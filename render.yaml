@@ -1,0 +1,19 @@
+# Render blueprint — one-click deploy of the single-service Docker image.
+# In Render: New > Blueprint > connect this repo. (Fly.io and Railway also work
+# with the same Dockerfile.)
+services:
+  - type: web
+    name: cuas-decision-map
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    plan: free
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      # Phase 2 live-feed secrets — set in the Render dashboard, not here.
+      - key: FAA_NOTAM_API_KEY
+        sync: false
+      - key: OPENSKY_CLIENT_ID
+        sync: false
+      - key: OPENSKY_CLIENT_SECRET
+        sync: false

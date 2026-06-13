@@ -1,0 +1,115 @@
+# Texas state posture (pilot jurisdiction).
+#
+# Texas confers NO independent counter-UAS mitigation authority. Navigable
+# airspace is exclusively federal (49 U.S.C. § 40103), so the federal criminal
+# prohibitions apply with full force in Texas and there is no state safe harbor.
+# Tex. Gov't Code ch. 423 governs UAS *operation/surveillance* (and makes flying
+# over certain critical-infrastructure / correctional / sports-venue sites an
+# offense) — it regulates the drone operator, not the defender. That offense is
+# what supports reporting to Texas DPS / FBI (see documentation pathway).
+#
+# VERIFY WITH COUNSEL: portions of ch. 423 were affected by NPPA v. McCraw
+# (5th Cir. 2023); confirm the current operative text.
+#
+# These rules reinforce — but never relax — the federal posture, and apply only
+# to non-federal, non-certified profiles. Certified SLTT use runs through the
+# federal SAFER SKIES pathway, not state law.
+
+- id: tx-mit-rfjam-001
+  countermeasure: rf_jamming
+  jurisdiction: texas
+  applies_to_profiles: [state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "Tex. Gov't Code ch. 423; 49 U.S.C. § 40103 (federal preemption)"
+    source_url: "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.423.htm"
+  rationale: "No Texas statute authorizes private/non-certified C-UAS mitigation; federal restrictions control."
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: tx-mit-gnss-001
+  countermeasure: gnss_jam_spoof
+  jurisdiction: texas
+  applies_to_profiles: [state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "Tex. Gov't Code ch. 423; 49 U.S.C. § 40103 (federal preemption)"
+    source_url: "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.423.htm"
+  rationale: "No Texas statute authorizes private/non-certified C-UAS mitigation; federal restrictions control."
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: tx-mit-takeover-001
+  countermeasure: protocol_takeover
+  jurisdiction: texas
+  applies_to_profiles: [state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "Tex. Gov't Code ch. 423; 49 U.S.C. § 40103 (federal preemption)"
+    source_url: "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.423.htm"
+  rationale: "No Texas statute authorizes private/non-certified C-UAS mitigation; federal restrictions control."
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: tx-mit-kinetic-001
+  countermeasure: kinetic
+  jurisdiction: texas
+  applies_to_profiles: [state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "Tex. Gov't Code ch. 423; Tex. Penal Code § 42.01 (discharge of firearm); 49 U.S.C. § 40103"
+    source_url: "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.423.htm"
+  rationale: >-
+    No Texas statute authorizes private/non-certified C-UAS mitigation; federal
+    aircraft-sabotage law controls, and discharging a firearm in a populated
+    area independently violates state/local law.
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: tx-mit-net-001
+  countermeasure: net_capture
+  jurisdiction: texas
+  applies_to_profiles: [state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "Tex. Gov't Code ch. 423; 49 U.S.C. § 40103 (federal preemption)"
+    source_url: "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.423.htm"
+  rationale: "No Texas statute authorizes private/non-certified C-UAS mitigation; federal restrictions control."
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: tx-mit-interceptor-001
+  countermeasure: interceptor_drone
+  jurisdiction: texas
+  applies_to_profiles: [state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "Tex. Gov't Code ch. 423; 49 U.S.C. § 40103 (federal preemption)"
+    source_url: "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.423.htm"
+  rationale: "No Texas statute authorizes private/non-certified C-UAS mitigation; federal restrictions control."
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: tx-mit-hpm-001
+  countermeasure: hpm
+  jurisdiction: texas
+  applies_to_profiles: [state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "Tex. Gov't Code ch. 423; 49 U.S.C. § 40103 (federal preemption)"
+    source_url: "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.423.htm"
+  rationale: "No Texas statute authorizes private/non-certified C-UAS mitigation; federal restrictions control."
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: tx-mit-hel-001
+  countermeasure: hel
+  jurisdiction: texas
+  applies_to_profiles: [state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "Tex. Gov't Code ch. 423; 49 U.S.C. § 40103 (federal preemption)"
+    source_url: "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.423.htm"
+  rationale: "No Texas statute authorizes private/non-certified C-UAS mitigation; federal restrictions control."
+  as_of: "2026-06-13"
+  review_owner: counsel

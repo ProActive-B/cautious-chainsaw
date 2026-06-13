@@ -1,0 +1,25 @@
+{
+  "_note": "SAMPLE / PLACEHOLDER staging data for the Texas pilot. Geometries are approximate (center + radius) and exist to exercise the attribute and rules logic end-to-end. Replace with real FAA UASFM/airspace, Census, building, and HIFLD layers in Phase 2. Do not use operationally.",
+  "default_view": { "lat": 32.85, "lon": -96.85, "zoom": 9 },
+  "pilot_site": {
+    "label": "Pilot Data Center Campus (sample)",
+    "lat": 32.95,
+    "lon": -96.65
+  },
+  "airports": [
+    { "ident": "DFW", "name": "Dallas/Fort Worth Intl", "lat": 32.8998, "lon": -97.0403, "airspace_class": "B", "radius_nm": 12.0, "uasfm_ceiling_ft": 0 },
+    { "ident": "DAL", "name": "Dallas Love Field", "lat": 32.8471, "lon": -96.8518, "airspace_class": "D", "radius_nm": 4.3, "uasfm_ceiling_ft": 0 },
+    { "ident": "ADS", "name": "Addison", "lat": 32.9686, "lon": -96.8364, "airspace_class": "D", "radius_nm": 4.0, "uasfm_ceiling_ft": 50 }
+  ],
+  "population_areas": [
+    { "label": "Downtown Dallas", "lat": 32.7767, "lon": -96.7970, "radius_nm": 5.0, "density_per_km2": 1600 },
+    { "label": "Garland / NE suburbs", "lat": 32.91, "lon": -96.63, "radius_nm": 6.0, "density_per_km2": 1300 },
+    { "label": "Pilot campus vicinity (industrial)", "lat": 32.95, "lon": -96.65, "radius_nm": 1.5, "density_per_km2": 280 }
+  ],
+  "zones": [
+    { "flag": "critical_infrastructure_zone", "label": "Pilot Data Center Campus (critical infrastructure)", "lat": 32.95, "lon": -96.65, "radius_nm": 0.5 },
+    { "flag": "stadium", "label": "AT&T Stadium, Arlington", "lat": 32.7473, "lon": -97.0945, "radius_nm": 0.6 },
+    { "flag": "military_installation", "label": "NAS Fort Worth JRB", "lat": 32.7691, "lon": -97.4413, "radius_nm": 3.0 },
+    { "flag": "correctional_facility", "label": "Sample correctional facility", "lat": 32.55, "lon": -96.30, "radius_nm": 0.7 }
+  ]
+}

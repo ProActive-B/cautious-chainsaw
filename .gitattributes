@@ -1,0 +1,6 @@
+# Normalize line endings: store LF in the repo, let Windows check out CRLF.
+# Keeps diffs clean across Windows dev and Linux CI/containers.
+* text=auto eol=lf
+*.png binary
+*.jpg binary
+*.ico binary

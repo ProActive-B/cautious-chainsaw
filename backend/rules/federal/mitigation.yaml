@@ -1,0 +1,265 @@
+# Federal posture for MITIGATION countermeasures.
+#
+# Baseline: mitigation is PROHIBITED for non-federal entities under the federal
+# criminal code (18 U.S.C. § 32, § 2511; 47 U.S.C. § 333/§ 302a; 49 U.S.C.
+# § 46307). Statutory exceptions exist only for designated federal agencies
+# (6 U.S.C. § 124n DHS/DOJ, 10 U.S.C. § 130i DoD, FY2026 NDAA § 3111 DOE) and —
+# for a subset of methods — for SAFER-SKIES-certified state/local LE.
+#
+# VERIFY WITH COUNSEL: the SAFER SKIES SLTT pathway (FY2026 NDAA) and its
+# implementing DOJ regulations are new and were still settling as of mid-2026.
+
+# ----------------------------------------------------------------------------
+# RF jamming / disruption — FCC bar; SLTT-certified covered.
+# ----------------------------------------------------------------------------
+- id: fed-mit-rfjam-001
+  countermeasure: rf_jamming
+  jurisdiction: federal
+  applies_to_profiles:
+    [state_local_le_certified, state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "47 U.S.C. § 333; 47 U.S.C. § 302a"
+    source_url: "https://www.fcc.gov/enforcement/areas/jammers"
+    advisory: "DOJ/DHS/FAA/FCC Advisory, Aug 2020"
+  rationale: >-
+    Willful interference with radio communications, and the operation of
+    jamming equipment, are prohibited. Disrupts nearby cellular, Wi-Fi, GPS,
+    and public-safety comms.
+  exceptions:
+    - profile: federal_124n
+      effect: conditional
+      conditions: [credible_threat, faa_coordination]
+    - profile: dod_130i
+      effect: conditional
+      conditions: [credible_threat, faa_coordination]
+    - profile: doe_nnsa
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, nnsa_facility]
+    - profile: state_local_le_certified
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, doj_certification]
+      note: "SAFER SKIES authorizes certified SLTT RF-link disruption against credible threats."
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+# ----------------------------------------------------------------------------
+# GNSS / GPS jamming or spoofing — NOT in the SLTT pathway.
+# ----------------------------------------------------------------------------
+- id: fed-mit-gnss-001
+  countermeasure: gnss_jam_spoof
+  jurisdiction: federal
+  applies_to_profiles:
+    [state_local_le_certified, state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "47 U.S.C. § 333; 49 U.S.C. § 46307"
+    source_url: "https://www.fcc.gov/general/jamming-cell-phones-and-gps-equipment-against-law"
+    advisory: "FAA GPS/GNSS Interference Resource Guide"
+  rationale: >-
+    GPS jamming/spoofing is prohibited and creates uncontainable area effects
+    on aviation navigation, timing, and emergency services. Not authorized for
+    certified SLTT under SAFER SKIES; federal-agency use is tightly constrained.
+  exceptions:
+    - profile: federal_124n
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, no_manned_aircraft_in_area]
+    - profile: dod_130i
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, no_manned_aircraft_in_area]
+    - profile: doe_nnsa
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, nnsa_facility]
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+# ----------------------------------------------------------------------------
+# Protocol takeover / safe-landing — Wiretap + CFAA + § 32.
+# ----------------------------------------------------------------------------
+- id: fed-mit-takeover-001
+  countermeasure: protocol_takeover
+  jurisdiction: federal
+  applies_to_profiles:
+    [state_local_le_certified, state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "18 U.S.C. § 2511; 18 U.S.C. § 1030; 18 U.S.C. § 32"
+    source_url: "https://www.law.cornell.edu/uscode/text/18/2511"
+    advisory: "DOJ/DHS/FAA/FCC Advisory, Aug 2020"
+  rationale: >-
+    Intercepting and injecting control-link commands implicates the Wiretap
+    Act and the CFAA; forcing a landing/diversion can also implicate aircraft
+    sabotage. Safe-landing zone must be deconflicted from manned aircraft.
+  exceptions:
+    - profile: federal_124n
+      effect: conditional
+      conditions: [credible_threat, faa_coordination]
+    - profile: dod_130i
+      effect: conditional
+      conditions: [credible_threat, faa_coordination]
+    - profile: doe_nnsa
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, nnsa_facility]
+    - profile: state_local_le_certified
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, doj_certification]
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+# ----------------------------------------------------------------------------
+# Kinetic (projectiles / firearms) — aircraft destruction.
+# ----------------------------------------------------------------------------
+- id: fed-mit-kinetic-001
+  countermeasure: kinetic
+  jurisdiction: federal
+  applies_to_profiles:
+    [state_local_le_certified, state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "18 U.S.C. § 32"
+    source_url: "https://www.law.cornell.edu/uscode/text/18/32"
+    advisory: "DOJ Criminal Resource Manual — Aircraft Sabotage (18 U.S.C. § 32)"
+  rationale: >-
+    Drones are 'aircraft'; willfully damaging or destroying one is a federal
+    felony. High falling-debris and stray-projectile hazard in populated areas.
+  exceptions:
+    - profile: federal_124n
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, clear_fall_zone]
+    - profile: dod_130i
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, clear_fall_zone]
+    - profile: doe_nnsa
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, nnsa_facility, clear_fall_zone]
+    - profile: state_local_le_certified
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, doj_certification, clear_fall_zone]
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+# ----------------------------------------------------------------------------
+# Net capture — less destructive but still aircraft interference.
+# ----------------------------------------------------------------------------
+- id: fed-mit-net-001
+  countermeasure: net_capture
+  jurisdiction: federal
+  applies_to_profiles:
+    [state_local_le_certified, state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "18 U.S.C. § 32"
+    source_url: "https://www.law.cornell.edu/uscode/text/18/32"
+    advisory: "DOJ/DHS/FAA/FCC Advisory, Aug 2020"
+  rationale: >-
+    Net capture interferes with/disables an aircraft (§ 32), but is lower
+    collateral risk than kinetic — captured drone descends under net/parachute
+    rather than fragmenting. Watch for falling-payload and power-line fouling.
+  exceptions:
+    - profile: federal_124n
+      effect: conditional
+      conditions: [credible_threat, faa_coordination]
+    - profile: dod_130i
+      effect: conditional
+      conditions: [credible_threat, faa_coordination]
+    - profile: doe_nnsa
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, nnsa_facility]
+    - profile: state_local_le_certified
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, doj_certification]
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+# ----------------------------------------------------------------------------
+# Interceptor / capture drone — § 32 + Part 107 airspace rules.
+# ----------------------------------------------------------------------------
+- id: fed-mit-interceptor-001
+  countermeasure: interceptor_drone
+  jurisdiction: federal
+  applies_to_profiles:
+    [state_local_le_certified, state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "18 U.S.C. § 32; 14 CFR Part 107"
+    source_url: "https://www.law.cornell.edu/uscode/text/18/32"
+    advisory: "DOJ/DHS/FAA/FCC Advisory, Aug 2020"
+  rationale: >-
+    Air-to-air interception disables an aircraft (§ 32) and the interceptor
+    itself is a UAS subject to Part 107; collision risk with manned aircraft
+    in congested airspace.
+  exceptions:
+    - profile: federal_124n
+      effect: conditional
+      conditions: [credible_threat, faa_coordination]
+    - profile: dod_130i
+      effect: conditional
+      conditions: [credible_threat, faa_coordination]
+    - profile: doe_nnsa
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, nnsa_facility]
+    - profile: state_local_le_certified
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, doj_certification]
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+# ----------------------------------------------------------------------------
+# High-power microwave — federal/military only.
+# ----------------------------------------------------------------------------
+- id: fed-mit-hpm-001
+  countermeasure: hpm
+  jurisdiction: federal
+  applies_to_profiles:
+    [state_local_le_certified, state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "47 U.S.C. § 302a; 47 U.S.C. § 333"
+    source_url: "https://www.fcc.gov/enforcement/areas/jammers"
+    advisory: "DOJ/DHS/FAA/FCC Advisory, Aug 2020"
+  rationale: >-
+    HPM emitters are unlicensed RF devices barred outside federal authority and
+    cause area electronics damage; not in the SLTT pathway. Federal use is on
+    designated sites/ranges with deconfliction.
+  exceptions:
+    - profile: federal_124n
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, beam_path_clear]
+    - profile: dod_130i
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, beam_path_clear]
+    - profile: doe_nnsa
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, nnsa_facility, beam_path_clear]
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+# ----------------------------------------------------------------------------
+# High-energy laser — federal/military only; eye + aviation hazard.
+# ----------------------------------------------------------------------------
+- id: fed-mit-hel-001
+  countermeasure: hel
+  jurisdiction: federal
+  applies_to_profiles:
+    [state_local_le_certified, state_local_le_uncertified, ci_owner, private_security]
+  effect: prohibited
+  citation:
+    statute: "49 U.S.C. § 46307; FAA laser guidance"
+    source_url: "https://www.faa.gov/about/initiatives/lasers"
+    advisory: "Pentagon–FAA C-UAS laser safety agreement (Apr 2026)"
+  rationale: >-
+    Aiming a laser at aircraft is a federal crime; HEL has a large nominal
+    ocular hazard distance and aviation flash/dazzle risk. Federal/military use
+    only, under restricted airspace conditions.
+  exceptions:
+    - profile: federal_124n
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, beam_path_clear, nohd_clear]
+    - profile: dod_130i
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, beam_path_clear, nohd_clear]
+    - profile: doe_nnsa
+      effect: conditional
+      conditions: [credible_threat, faa_coordination, nnsa_facility, beam_path_clear, nohd_clear]
+  as_of: "2026-06-13"
+  review_owner: counsel

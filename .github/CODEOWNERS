@@ -1,0 +1,13 @@
+# Protect the crown-jewel asset: the legal rules database.
+# Any change under backend/rules/** requires review by the designated
+# counsel/SME reviewer before it can merge (enforce via branch protection:
+# Settings > Branches > require review from Code Owners).
+#
+# REPLACE the placeholders below with real GitHub usernames/teams.
+
+# Default owner for everything
+*                       @REPLACE-with-your-github-username
+
+# Legal rules require counsel/SME sign-off
+/backend/rules/         @REPLACE-with-counsel-reviewer
+/docs/SOURCES.md        @REPLACE-with-counsel-reviewer

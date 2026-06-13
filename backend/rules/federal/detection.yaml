@@ -1,0 +1,76 @@
+# Federal posture for DETECTION countermeasures.
+# Detection is broadly permissible for all profiles, but RF methods carry
+# Wiretap Act / Pen-Trap nuance if they intercept or decode communications.
+# Source framing: DOJ/DHS/FAA/FCC Advisory (Aug 2020).
+
+- id: fed-det-rf-001
+  countermeasure: rf_detection
+  jurisdiction: federal
+  applies_to_profiles:
+    [federal_124n, dod_130i, doe_nnsa, state_local_le_certified,
+     state_local_le_uncertified, ci_owner, private_security]
+  effect: permitted
+  citation:
+    statute: "18 U.S.C. § 2511; 18 U.S.C. § 3121 (limits)"
+    source_url: "https://www.dhs.gov/publication/interagency-legal-advisory-uas-detection-and-mitigation-technologies"
+    advisory: "DOJ/DHS/FAA/FCC Advisory, Aug 2020"
+  rationale: >-
+    Passive RF presence detection and direction-finding are generally
+    permissible. Do NOT intercept, record, or decode the content of the
+    control/telemetry link (Wiretap Act § 2511) or capture identifying
+    signaling such as serial numbers (Pen/Trap § 3121); that crosses into
+    prohibited interception.
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: fed-det-radar-001
+  countermeasure: radar
+  jurisdiction: federal
+  applies_to_profiles:
+    [federal_124n, dod_130i, doe_nnsa, state_local_le_certified,
+     state_local_le_uncertified, ci_owner, private_security]
+  effect: permitted
+  citation:
+    statute: "47 U.S.C. § 301 (FCC equipment authorization)"
+    source_url: "https://www.fcc.gov/wireless/bureau-divisions/mobility-division/radar-services"
+    advisory: "DHS S&T C-UAS Technology Guide"
+  rationale: >-
+    Radar detection is permissible. Transmitters require FCC equipment
+    authorization and frequency coordination near airports to avoid
+    interfering with aviation navigation/approach radar.
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: fed-det-eoir-001
+  countermeasure: eo_ir
+  jurisdiction: federal
+  applies_to_profiles:
+    [federal_124n, dod_130i, doe_nnsa, state_local_le_certified,
+     state_local_le_uncertified, ci_owner, private_security]
+  effect: permitted
+  citation:
+    statute: "DOJ/DHS/FAA/FCC Advisory (no federal bar on passive optical)"
+    source_url: "https://www.dhs.gov/publication/interagency-legal-advisory-uas-detection-and-mitigation-technologies"
+    advisory: "DOJ/DHS/FAA/FCC Advisory, Aug 2020"
+  rationale: >-
+    Passive electro-optical/infrared observation is permissible federally.
+    Check state privacy law on thermal imaging in some jurisdictions.
+  as_of: "2026-06-13"
+  review_owner: counsel
+
+- id: fed-det-acoustic-001
+  countermeasure: acoustic
+  jurisdiction: federal
+  applies_to_profiles:
+    [federal_124n, dod_130i, doe_nnsa, state_local_le_certified,
+     state_local_le_uncertified, ci_owner, private_security]
+  effect: permitted
+  citation:
+    statute: "No federal restriction on passive acoustic detection"
+    source_url: "https://www.dhs.gov/publication/st-c-uas-technology-guide"
+    advisory: "DHS S&T C-UAS Technology Guide"
+  rationale: >-
+    Passive acoustic detection is permissible. Avoid recording human
+    conversations (state/federal wiretap exposure).
+  as_of: "2026-06-13"
+  review_owner: counsel
