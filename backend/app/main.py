@@ -8,7 +8,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import __version__
 from .config import settings
-from .feeds import faa, notam, opensky
+from .feeds import adsb, faa, notam
 from .models import AssessRequest, DecisionReport
 from .report import build_report
 from .rules.loader import load_rules
@@ -40,7 +40,7 @@ def health() -> dict:
         "rules_db_version": settings.rules_db_version,
         "feeds": {
             "faa_airspace_staged": faa.has_data(),
-            "opensky_authenticated": bool(settings.opensky_client_id),
+            "aircraft_provider": "adsb.lol / airplanes.live (community, keyless)",
             "tfr_configured": bool(settings.faa_notam_api_key),
         },
     }
@@ -71,15 +71,15 @@ async def aircraft(
     if lamax - lamin > 2 or lomax - lomin > 2:
         clat, clon = (lamin + lamax) / 2, (lomin + lomax) / 2
         lamin, lamax, lomin, lomax = clat - 1, clat + 1, clon - 1, clon + 1
-    data = await opensky.fetch_aircraft(lamin, lomin, lamax, lomax)
+    data = await adsb.fetch_aircraft(lamin, lomin, lamax, lomax)
     return {"count": len(data), "aircraft": data}
 
 
-@app.get("/api/_debug/opensky")
-async def debug_opensky() -> dict:
-    """Diagnostics for the live aircraft feed (no secrets) — why is it empty?"""
-    await opensky.fetch_aircraft(32.6, -97.2, 33.1, -96.5, use_cache=False)
-    return opensky.last_status
+@app.get("/api/_debug/aircraft")
+async def debug_aircraft() -> dict:
+    """Diagnostics for the live aircraft feed (which provider, status, count)."""
+    await adsb.fetch_aircraft(32.6, -97.2, 33.1, -96.5, use_cache=False)
+    return adsb.last_status
 
 
 @app.post("/api/assess", response_model=DecisionReport)

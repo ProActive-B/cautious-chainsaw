@@ -10,6 +10,11 @@ frontend/node_modules/
 frontend/dist/
 frontend/.vite/
 
+# Secrets — never commit
+backend/.env
+credentials.json
+*.secret
+
 # Editor / OS
 .DS_Store
 *.log
