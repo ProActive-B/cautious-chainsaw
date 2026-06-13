@@ -76,6 +76,10 @@ docker run -p 8000:8000 cuas-decision-map   # open http://localhost:8000
 **Render (fastest shareable URL):** push to GitHub, then in Render choose
 *New → Blueprint* and point it at this repo — [render.yaml](render.yaml) defines
 the service. Fly.io and Railway work with the same [Dockerfile](Dockerfile).
+
+**Self-hosted / Hostinger VPS:** see [docs/DEPLOY_HOSTINGER_VPS.md](docs/DEPLOY_HOSTINGER_VPS.md)
+— Coolify/Dokploy for GitHub auto-deploy + HTTPS, or plain `docker compose up -d`
+([docker-compose.yml](docker-compose.yml)).
 Phase-2 feed secrets (`FAA_NOTAM_API_KEY`, `OPENSKY_*`) go in the host's
 dashboard, never in the repo.
 

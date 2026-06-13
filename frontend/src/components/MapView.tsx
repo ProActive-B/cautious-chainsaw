@@ -102,7 +102,7 @@ const LAYER_IDS: Record<string, string[]> = {
   sua: ["sua-fill", "sua-line"],
   zones: ["zones-fill", "zones-line"],
   sites: ["sites-circle"],
-  aircraft: ["aircraft-circle", "aircraft-label"],
+  aircraft: ["aircraft-plane", "aircraft-label"],
 };
 
 function emptyFC(): GeoJSON.FeatureCollection {
@@ -121,7 +121,7 @@ async function refreshAircraft(map: MLMap) {
         .filter((a) => !a.on_ground)
         .map((a) => ({
           type: "Feature",
-          properties: { callsign: a.callsign ?? a.icao24, alt_ft: a.alt_ft ?? 10000 },
+          properties: { callsign: a.callsign ?? a.icao24, alt_ft: a.alt_ft ?? 10000, track: a.track ?? 0 },
           geometry: { type: "Point", coordinates: [a.lon, a.lat] },
         })),
     };
@@ -132,33 +132,79 @@ async function refreshAircraft(map: MLMap) {
   }
 }
 
+// Plane icon colors by altitude band (low/overhead = red → high = blue),
+// matching the legend in the user guide.
+const PLANE_ICONS: Record<string, string> = {
+  "plane-low": "#e5534b",
+  "plane-mid": "#e3b341",
+  "plane-high": "#2ea043",
+  "plane-top": "#2b6cb0",
+};
+
+// Draw a top-down plane silhouette (pointing north/up so icon-rotate = heading).
+function makePlaneIcon(color: string, px = 2): ImageData {
+  const size = 24;
+  const canvas = document.createElement("canvas");
+  canvas.width = size * px;
+  canvas.height = size * px;
+  const ctx = canvas.getContext("2d")!;
+  ctx.scale(px, px);
+  ctx.translate(size / 2, size / 2);
+  ctx.fillStyle = color;
+  ctx.strokeStyle = "#ffffff";
+  ctx.lineWidth = 0.8;
+  ctx.lineJoin = "round";
+  const pts: [number, number][] = [
+    [0, -11], [1.4, -3.5], [11, 2.5], [11, 5], [1.4, 1.5],
+    [1.1, 8], [4.5, 10.5], [4.5, 11.5], [0, 9.8],
+    [-4.5, 11.5], [-4.5, 10.5], [-1.1, 8], [-1.4, 1.5],
+    [-11, 5], [-11, 2.5], [-1.4, -3.5],
+  ];
+  ctx.beginPath();
+  pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
+  return ctx.getImageData(0, 0, size * px, size * px);
+}
+
+function ensurePlaneIcons(map: MLMap) {
+  for (const [id, color] of Object.entries(PLANE_ICONS)) {
+    if (!map.hasImage(id)) map.addImage(id, makePlaneIcon(color), { pixelRatio: 2 });
+  }
+}
+
 function addAircraftLayers(map: MLMap) {
-  // Color by altitude: low (overhead, high collateral concern) = red → high = blue.
+  ensurePlaneIcons(map);
   map.addLayer({
-    id: "aircraft-circle",
-    type: "circle",
+    id: "aircraft-plane",
+    type: "symbol",
     source: "aircraft",
-    paint: {
-      "circle-radius": 5,
-      "circle-stroke-width": 1,
-      "circle-stroke-color": "#ffffff",
-      "circle-color": [
-        "interpolate", ["linear"], ["get", "alt_ft"],
-        0, "#e5534b", 1500, "#e3b341", 5000, "#2ea043", 12000, "#2b6cb0",
+    layout: {
+      // Pick the colored plane by altitude band; rotate to heading.
+      "icon-image": [
+        "step", ["get", "alt_ft"],
+        "plane-low", 1500, "plane-mid", 5000, "plane-high", 12000, "plane-top",
       ],
+      "icon-size": 0.85,
+      "icon-rotate": ["coalesce", ["get", "track"], 0],
+      "icon-rotation-alignment": "map",
+      "icon-allow-overlap": true,
+      "icon-ignore-placement": true,
     },
   });
   map.addLayer({
     id: "aircraft-label",
     type: "symbol",
     source: "aircraft",
-    minzoom: 9,
+    minzoom: 10,
     layout: {
       "text-field": ["get", "callsign"],
       "text-size": 10,
-      "text-offset": [0, 1.2],
+      "text-offset": [0, 1.7],
+      "text-optional": true,
     },
-    paint: { "text-color": "#0f1419", "text-halo-color": "#ffffff", "text-halo-width": 1.2 },
+    paint: { "text-color": "#1a2029", "text-halo-color": "#ffffff", "text-halo-width": 1.2 },
   });
 }
 
@@ -189,7 +235,7 @@ function addDataLayers(map: MLMap, layers: Layers | null) {
         ],
         "fill-opacity": 0.22,
       },
-    }, "aircraft-circle");
+    }, "aircraft-plane");
   }
   if (!map.getLayer("airspace-fill")) {
     map.addLayer({
@@ -201,31 +247,31 @@ function addDataLayers(map: MLMap, layers: Layers | null) {
         ],
         "fill-opacity": 0.10,
       },
-    }, "aircraft-circle");
+    }, "aircraft-plane");
     map.addLayer({
       id: "airspace-line", type: "line", source: "airspace",
       paint: { "line-color": "#2b6cb0", "line-width": 1.2 },
-    }, "aircraft-circle");
+    }, "aircraft-plane");
   }
   if (!map.getLayer("sua-fill")) {
     map.addLayer({
       id: "sua-fill", type: "fill", source: "sua",
       paint: { "fill-color": "#b91c1c", "fill-opacity": 0.14 },
-    }, "aircraft-circle");
+    }, "aircraft-plane");
     map.addLayer({
       id: "sua-line", type: "line", source: "sua",
       paint: { "line-color": "#7f1d1d", "line-width": 1, "line-dasharray": [2, 1] },
-    }, "aircraft-circle");
+    }, "aircraft-plane");
   }
   if (!map.getLayer("zones-fill")) {
     map.addLayer({
       id: "zones-fill", type: "fill", source: "zones",
       paint: { "fill-color": "#d97706", "fill-opacity": 0.3 },
-    }, "aircraft-circle");
+    }, "aircraft-plane");
     map.addLayer({
       id: "zones-line", type: "line", source: "zones",
       paint: { "line-color": "#b45309", "line-width": 2 },
-    }, "aircraft-circle");
+    }, "aircraft-plane");
   }
   if (!map.getLayer("sites-circle")) {
     map.addLayer({
@@ -234,6 +280,6 @@ function addDataLayers(map: MLMap, layers: Layers | null) {
         "circle-radius": 7, "circle-color": "#7c3aed",
         "circle-stroke-color": "#fff", "circle-stroke-width": 2,
       },
-    }, "aircraft-circle");
+    }, "aircraft-plane");
   }
 }

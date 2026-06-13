@@ -1,0 +1,27 @@
+# Run the whole app as one container (FastAPI serves the built frontend + the API).
+# Intended for a Hostinger VPS (or any Docker host). See docs/DEPLOY_HOSTINGER_VPS.md.
+#
+#   docker compose up -d --build      # start (build the image first time)
+#   docker compose logs -f            # tail logs
+#   docker compose pull && docker compose up -d --build   # update after a git pull
+services:
+  app:
+    build: .
+    image: cuas-decision-map:latest
+    container_name: cuas-decision-map
+    ports:
+      - "8000:8000"          # host:container — put a reverse proxy in front for HTTPS
+    environment:
+      - PORT=8000
+      # Optional. Live aircraft use keyless community feeds and need NO key.
+      # Set these only to enable extra sources:
+      # - FAA_NOTAM_API_KEY=
+      # - OPENSKY_CLIENT_ID=
+      # - OPENSKY_CLIENT_SECRET=
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8000/health').getcode()==200 else 1)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 25s
