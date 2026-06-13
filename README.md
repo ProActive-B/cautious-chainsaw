@@ -56,6 +56,32 @@ cd backend
 .\.venv\Scripts\python.exe -m pytest -q
 ```
 
+## Deploy (demo)
+
+The app ships as a **single service**: `npm run build` produces the frontend,
+and FastAPI serves it at `/` alongside the API at `/api`. One image, one URL,
+no CORS.
+
+```powershell
+# Build the image and run it locally
+docker build -t cuas-decision-map .
+docker run -p 8000:8000 cuas-decision-map   # open http://localhost:8000
+```
+
+**Render (fastest shareable URL):** push to GitHub, then in Render choose
+*New → Blueprint* and point it at this repo — [render.yaml](render.yaml) defines
+the service. Fly.io and Railway work with the same [Dockerfile](Dockerfile).
+Phase-2 feed secrets (`FAA_NOTAM_API_KEY`, `OPENSKY_*`) go in the host's
+dashboard, never in the repo.
+
+**Push to GitHub** (create an empty private repo first):
+```powershell
+git remote add origin https://github.com/<you>/cuas-decision-map.git
+git push -u origin main
+```
+Then enable branch protection + required Code Owner review on `main` so changes
+under `backend/rules/**` require counsel/SME sign-off (see [.github/CODEOWNERS](.github/CODEOWNERS)).
+
 ## How a decision is made
 1. Pick an **authority profile** (e.g. private security, CI owner, federal §124n,
    certified SLTT). This is the master filter.
