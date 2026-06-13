@@ -64,6 +64,18 @@ def test_nearby_aircraft_tolerates_null_icao24_and_alt():
     assert len(loc.nearby_aircraft) == 2
 
 
+def test_gather_uses_injected_population_and_buildings():
+    loc = gather(
+        32.95, -96.65,
+        population={"density_per_km2": 1800, "tract": "Census Tract 1"},
+        buildings={"count": 140, "band": "high", "radius_m": 500},
+    )
+    assert loc.population_density_per_km2 == 1800
+    assert loc.building_density == "high"
+    assert loc.building_count == 140
+    assert loc.rf_congestion == "high"
+
+
 def test_tfr_note_surfaced_when_unconfigured():
     tfr = {"configured": False, "tfrs": [], "note": "TFR feed not configured."}
     loc = gather(32.95, -96.65, tfr_result=tfr)

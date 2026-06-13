@@ -13,9 +13,11 @@ try:
     r = client.post("/api/assess", json=body)
     print("status:", r.status_code)
     if r.status_code == 200:
-        j = r.json()
-        print("nearby_aircraft:", len(j["location"]["nearby_aircraft"]))
-        print("conditional:", len(j["conditional"]))
+        loc = r.json()["location"]
+        print("population_density_per_km2:", loc["population_density_per_km2"])
+        print("building_density:", loc["building_density"], "| building_count:", loc["building_count"])
+        print("nearby_aircraft:", len(loc["nearby_aircraft"]))
+        print("notes:", [n for n in loc["notes"] if "Census" in n or "OpenStreetMap" in n])
     else:
         print("body:", r.text[:500])
 except Exception:

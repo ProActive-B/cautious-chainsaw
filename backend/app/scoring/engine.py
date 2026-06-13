@@ -53,8 +53,20 @@ def _airspace_deconfliction(loc: LocationAttributes) -> tuple[int, list[str]]:
     return penalty, drivers
 
 
+def _pop_band(loc: LocationAttributes) -> str | None:
+    """Population band drives debris-to-people risk (people on the ground)."""
+    d = loc.population_density_per_km2
+    if d is None:
+        return None
+    if d >= 1000:
+        return "high"
+    if d >= 300:
+        return "medium"
+    return "low"
+
+
 def score(cm: Countermeasure, loc: LocationAttributes) -> RiskScore:
-    pop = loc.building_density
+    pop = _pop_band(loc)  # debris risk scales with population density, not building count
     rf = loc.rf_congestion
     air_pen, air_drivers = _airspace_deconfliction(loc)
 

@@ -83,6 +83,7 @@ class LocationAttributes(BaseModel):
     nearest_airport_distance_nm: Optional[float] = None
     population_density_per_km2: Optional[float] = None
     building_density: Optional[Literal["low", "medium", "high"]] = None
+    building_count: Optional[int] = None
     rf_congestion: Optional[Literal["low", "medium", "high"]] = None
     # Boolean zone flags (drive requires_location_flag rules).
     location_flags: dict[str, bool] = Field(default_factory=dict)

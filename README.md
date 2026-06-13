@@ -18,11 +18,13 @@ collateral-**risk score** for each actionable option, and the
 - ✅ Collateral risk scoring (debris/RF/GPS/laser/aviation-deconfliction)
 - ✅ Documentation pathway generator
 - ✅ React + MapLibre frontend (click-to-assess, layer toggles)
-- ✅ **Phase 2 — live feeds & real airspace:** live ADS-B aircraft (OpenSky) feed
-  overhead-traffic into the risk score; **real FAA Class B/C/D + Special Use
-  Airspace** for Texas drive the authoritative airspace class. TFR/NOTAM client
-  is wired but key-gated (set `FAA_NOTAM_API_KEY`). Population/buildings/terrain
-  and bespoke zones are still **sample** data — next to replace.
+- ✅ **Phase 2 — live feeds & real data:** live ADS-B aircraft (community feeds,
+  keyless) feed overhead-traffic into the risk score; **real FAA Class B/C/D +
+  Special Use Airspace** (Texas) drive the airspace class; **real population
+  density** (US Census ACS, live point query) drives debris risk; **real building
+  density** (OpenStreetMap/Overpass). All keyless. TFR/NOTAM client is wired but
+  key-gated (`FAA_NOTAM_API_KEY`). Remaining sample data: terrain/LOS and the
+  bespoke zones (CI campus, stadium).
 - ⏳ **Phase 4:** TAK (ATAK/WinTAK) export; offline/on-prem bundles
 
 Refresh the staged FAA airspace anytime: `python backend/scripts/stage_faa_texas.py`.

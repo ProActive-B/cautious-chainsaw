@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from app.feeds import adsb, notam
+from app.feeds import adsb, buildings, census, notam
 from app.main import app
 
 client = TestClient(app)
@@ -28,6 +28,14 @@ async def _fake_tfr(*_a, **_k):
     return {"configured": False, "tfrs": [], "note": "TFR feed not configured."}
 
 
+async def _fake_pop(*_a, **_k):
+    return {"density_per_km2": 1800.0, "tract": "Census Tract 1", "source": "ACS"}
+
+
+async def _fake_buildings(*_a, **_k):
+    return {"count": 140, "band": "high", "radius_m": 500, "source": "OSM"}
+
+
 def test_health_ok():
     r = client.get("/health")
     assert r.status_code == 200
@@ -44,6 +52,8 @@ def test_aircraft_endpoint_ok(monkeypatch):
 def test_assess_endpoint_ok(monkeypatch):
     monkeypatch.setattr(adsb, "fetch_aircraft", _fake_aircraft)
     monkeypatch.setattr(notam, "fetch_tfrs", _fake_tfr)
+    monkeypatch.setattr(census, "population_density", _fake_pop)
+    monkeypatch.setattr(buildings, "building_density", _fake_buildings)
     r = client.post(
         "/api/assess",
         json={"profile": "federal_124n", "lat": 32.8998, "lon": -97.0403, "credible_threat": True},
@@ -51,5 +61,8 @@ def test_assess_endpoint_ok(monkeypatch):
     assert r.status_code == 200
     body = r.json()
     assert {"permitted", "conditional", "prohibited", "documentation"} <= body.keys()
+    # Real population + buildings flow into the location.
+    assert body["location"]["population_density_per_km2"] == 1800.0
+    assert body["location"]["building_count"] == 140
     # The malformed (null-icao24) aircraft must not break the response.
     assert isinstance(body["location"]["nearby_aircraft"], list)

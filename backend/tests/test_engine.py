@@ -17,7 +17,8 @@ from app.taxonomy import Countermeasure, Profile
 
 
 def _loc(**overrides) -> LocationAttributes:
-    base = dict(lat=32.95, lon=-96.65, building_density="medium", rf_congestion="medium")
+    base = dict(lat=32.95, lon=-96.65, population_density_per_km2=600,
+                building_density="medium", rf_congestion="medium")
     base.update(overrides)
     return LocationAttributes(**base)
 
@@ -74,13 +75,13 @@ def test_credible_threat_marks_condition_satisfied():
 
 # --- scoring ---
 def test_kinetic_higher_risk_in_dense_area():
-    high = scoring.score(Countermeasure.KINETIC, _loc(building_density="high"))
-    low = scoring.score(Countermeasure.KINETIC, _loc(building_density="low"))
+    high = scoring.score(Countermeasure.KINETIC, _loc(population_density_per_km2=2500))
+    low = scoring.score(Countermeasure.KINETIC, _loc(population_density_per_km2=40))
     assert high.value > low.value
 
 
 def test_gnss_is_high_risk():
-    s = scoring.score(Countermeasure.GNSS_JAM_SPOOF, _loc(building_density="low"))
+    s = scoring.score(Countermeasure.GNSS_JAM_SPOOF, _loc(population_density_per_km2=40))
     assert s.band == "high"
 
 

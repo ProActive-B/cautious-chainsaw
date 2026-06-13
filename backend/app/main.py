@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
+import asyncio
+
 from fastapi import FastAPI, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from . import __version__
 from .config import settings
-from .feeds import adsb, faa, notam
+from .feeds import adsb, buildings, census, faa, notam
 from .models import AssessRequest, DecisionReport
 from .report import build_report
 from .rules.loader import load_rules
@@ -41,6 +43,8 @@ def health() -> dict:
         "feeds": {
             "faa_airspace_staged": faa.has_data(),
             "aircraft_provider": "adsb.lol / airplanes.live (community, keyless)",
+            "population_source": "US Census ACS (live, keyless)",
+            "buildings_source": "OpenStreetMap / Overpass (live, keyless)",
             "tfr_configured": bool(settings.faa_notam_api_key),
         },
     }
@@ -86,9 +90,14 @@ async def debug_aircraft() -> dict:
 async def assess(req: AssessRequest) -> DecisionReport:
     """Core endpoint: location + profile -> decision report (with live feeds)."""
     bbox = (req.lat - _ASSESS_BOX, req.lon - _ASSESS_BOX, req.lat + _ASSESS_BOX, req.lon + _ASSESS_BOX)
-    air = await adsb.fetch_aircraft(*bbox)
-    tfr = await notam.fetch_tfrs(*bbox)
-    loc = gather(req.lat, req.lon, aircraft=air, tfr_result=tfr)
+    # Fetch all live feeds concurrently; each fails safe to None/[] internally.
+    air, tfr, pop, bld = await asyncio.gather(
+        adsb.fetch_aircraft(*bbox),
+        notam.fetch_tfrs(*bbox),
+        census.population_density(req.lat, req.lon),
+        buildings.building_density(req.lat, req.lon),
+    )
+    loc = gather(req.lat, req.lon, aircraft=air, tfr_result=tfr, population=pop, buildings=bld)
     return build_report(req, loc)
 
 

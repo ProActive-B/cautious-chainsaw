@@ -34,6 +34,8 @@ def gather(
     lon: float,
     aircraft: list[dict] | None = None,
     tfr_result: dict | None = None,
+    population: dict | None = None,
+    buildings: dict | None = None,
 ) -> LocationAttributes:
     seed = load_seed()
     notes: list[str] = []
@@ -41,16 +43,32 @@ def gather(
 
     airspace_class, uasfm_ceiling, nearest_airport, nearest_dist = _airspace(lat, lon, seed, flags, notes)
 
-    # --- Population / building / RF bands (still sample data) ---
-    density: float | None = None
+    # --- Population density: live US Census ACS if provided, else sample seed ---
     place_label = "Texas (sample area)"
-    for area in seed.get("population_areas", []):
-        if haversine_nm(lat, lon, area["lat"], area["lon"]) <= area["radius_nm"]:
-            if density is None or area["density_per_km2"] > density:
-                density = area["density_per_km2"]
-                place_label = area["label"]
+    if population:
+        density = population.get("density_per_km2")
+        notes.append(f"Population from US Census ACS ({population.get('tract')}).")
+    else:
+        density = None
+        for area in seed.get("population_areas", []):
+            if haversine_nm(lat, lon, area["lat"], area["lon"]) <= area["radius_nm"]:
+                if density is None or area["density_per_km2"] > density:
+                    density = area["density_per_km2"]
+                    place_label = area["label"]
+        notes.append("Population is SAMPLE data (Census feed unavailable).")
     pop_band = _band_from_density(density)
-    rf_congestion = "high" if (pop_band == "high" or (nearest_dist or 99) < 5) else pop_band
+
+    # --- Building density: live OpenStreetMap if provided, else mirror population ---
+    if buildings:
+        building_band = buildings.get("band")
+        building_count = buildings.get("count")
+        notes.append(f"Buildings from OpenStreetMap ({building_count} within {buildings.get('radius_m')} m).")
+    else:
+        building_band = pop_band
+        building_count = None
+
+    near_airport = (nearest_dist or 99) < 5
+    rf_congestion = "high" if (pop_band == "high" or building_band == "high" or near_airport) else (pop_band or building_band)
 
     # --- Bespoke zones (critical infrastructure, stadium, ...) from seed ---
     for zone in seed.get("zones", []):
@@ -59,10 +77,8 @@ def gather(
             place_label = zone["label"]
             notes.append(f"Inside zone: {zone['label']}")
 
-    # --- Live aircraft (provided by API) ---
+    # --- Live aircraft + TFRs (provided by API) ---
     nearby = _nearby_aircraft(lat, lon, aircraft or [])
-
-    # --- TFRs (provided by API) ---
     active_tfr, tfr_names = _tfrs(lat, lon, tfr_result, notes)
 
     return LocationAttributes(
@@ -74,7 +90,8 @@ def gather(
         nearest_airport=nearest_airport,
         nearest_airport_distance_nm=round(nearest_dist, 1) if nearest_dist is not None else None,
         population_density_per_km2=density,
-        building_density=pop_band,
+        building_density=building_band,
+        building_count=building_count,
         rf_congestion=rf_congestion,
         location_flags=flags,
         active_tfr=active_tfr,
