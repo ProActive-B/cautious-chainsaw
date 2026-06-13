@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CUAS Decision Map — User Guide</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#1a2029; --panel2:#222a35; --border:#2d3744;
+    --text:#e6edf3; --muted:#9aa7b4; --accent:#7c3aed;
+    --green:#2ea043; --amber:#d29922; --red:#e5534b; --blue:#2b6cb0; --link:#79c0ff;
+    --font:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font);line-height:1.55}
+  .wrap{max-width:980px;margin:0 auto;padding:40px 24px 80px}
+  header.hero{border-bottom:1px solid var(--border);padding-bottom:24px;margin-bottom:8px}
+  h1{font-size:30px;margin:0 0 6px}
+  h2{font-size:21px;margin:40px 0 6px;padding-top:18px;border-top:1px solid var(--border)}
+  h3{font-size:15px;margin:20px 0 6px;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+  p{margin:8px 0}
+  .lead{font-size:16px;color:var(--muted)}
+  .tag{display:inline-block;font-size:12px;color:var(--muted);border:1px solid var(--border);border-radius:12px;padding:1px 10px;margin-right:6px}
+  a{color:var(--link)}
+  code{background:var(--panel2);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:13px}
+  .fig{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;margin:16px 0}
+  .fig svg{display:block;width:100%;height:auto}
+  .cap{font-size:12.5px;color:var(--muted);margin-top:8px;text-align:center}
+  .disclaimer{background:rgba(210,153,34,.10);border:1px solid var(--amber);border-radius:8px;padding:12px 14px;color:#e3b341;font-size:13.5px;margin:18px 0}
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
+  .card b{color:var(--text)}
+  ul{margin:8px 0;padding-left:20px}
+  li{margin:4px 0}
+  .pill{display:inline-block;font-size:11px;border-radius:10px;padding:1px 8px;font-weight:600}
+  .p-green{background:rgba(46,160,67,.18);color:#4ac26b}
+  .p-amber{background:rgba(210,153,34,.18);color:#e3b341}
+  .p-red{background:rgba(229,83,75,.18);color:#ff7b72}
+  .toc{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 18px;margin:18px 0}
+  .toc a{display:block;padding:3px 0;text-decoration:none}
+  .footnote{color:var(--muted);font-size:12.5px;margin-top:8px}
+  @media(max-width:680px){.grid2{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="hero">
+  <h1>CUAS Decision Map — User Guide</h1>
+  <p class="lead">A map-based decision-support tool for choosing a counter-UAS (counter-drone) countermeasure at a specific location — what's legally permitted, how risky it is, and what to file when you can't act yourself.</p>
+  <div style="margin-top:10px">
+    <span class="tag">Pilot: Texas</span><span class="tag">Federal + state law</span><span class="tag">Live airspace &amp; aircraft</span>
+  </div>
+  <div class="disclaimer">⚠️ <b>Decision support — not legal advice or authorization.</b> Counter-UAS mitigation by unauthorized parties can be a federal crime. Every result is advisory, citation-backed, and version-stamped. Verify with counsel and coordinate with federal authorities before any action.</div>
+</header>
+
+<div class="toc">
+  <strong>In this guide</strong>
+  <a href="#overview">1 · The screen at a glance</a>
+  <a href="#profile">2 · Authority profile — the master filter</a>
+  <a href="#layers">3 · Map layers</a>
+  <a href="#report">4 · The decision report</a>
+  <a href="#risk">5 · Collateral-risk scoring</a>
+  <a href="#docs">6 · Documentation &amp; coordination pathway</a>
+  <a href="#flow">7 · How a decision is made</a>
+  <a href="#limits">8 · What it is — and isn't</a>
+</div>
+
+<!-- 1. OVERVIEW -->
+<h2 id="overview">1 · The screen at a glance</h2>
+<p>The app is a single screen: a control sidebar on the left, an interactive map on the right. You pick <em>who you are</em> (your authority), then <em>click a location</em>. The tool reads that location's airspace, population, terrain, and live air traffic and returns a tailored decision report.</p>
+<div class="fig">
+<svg viewBox="0 0 920 470" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Segoe UI,sans-serif">
+  <rect width="920" height="470" rx="8" fill="#1a2029"/>
+  <!-- sidebar -->
+  <rect x="0" y="0" width="320" height="470" rx="8" fill="#1a2029" stroke="#2d3744"/>
+  <text x="20" y="34" fill="#e6edf3" font-size="17" font-weight="700">CUAS Decision Map</text>
+  <text x="20" y="52" fill="#9aa7b4" font-size="11">Click the map to assess · pilot: Texas</text>
+  <text x="20" y="84" fill="#9aa7b4" font-size="11">AUTHORITY PROFILE</text>
+  <rect x="20" y="92" width="280" height="30" rx="6" fill="#222a35" stroke="#2d3744"/>
+  <text x="32" y="112" fill="#e6edf3" font-size="12">Federal — DHS/DOJ (6 U.S.C. § 124n) ▾</text>
+  <rect x="20" y="132" width="14" height="14" rx="3" fill="#7c3aed"/>
+  <text x="42" y="143" fill="#e6edf3" font-size="12">Credible threat declared</text>
+  <text x="20" y="172" fill="#9aa7b4" font-size="10">MAP LAYERS</text>
+  <g fill="#cfd8e0" font-size="11">
+    <text x="42" y="192">Live aircraft (ADS-B)</text>
+    <text x="42" y="210">Airspace (FAA Class B/C/D)</text>
+    <text x="42" y="228">Special-use airspace</text>
+    <text x="42" y="246">Population density</text>
+    <text x="42" y="264">Restricted zones</text>
+  </g>
+  <g fill="#7c3aed"><rect x="22" y="183" width="11" height="11" rx="2"/><rect x="22" y="201" width="11" height="11" rx="2"/><rect x="22" y="219" width="11" height="11" rx="2"/><rect x="22" y="237" width="11" height="11" rx="2"/><rect x="22" y="255" width="11" height="11" rx="2"/></g>
+  <rect x="20" y="288" width="280" height="36" rx="6" fill="#222a35" stroke="#7c3aed"/>
+  <text x="32" y="304" fill="#cfd8e0" font-size="10">DHS/DOJ covered-facility authority:</text>
+  <text x="32" y="317" fill="#cfd8e0" font-size="10">detection + mitigation w/ FAA coordination</text>
+  <text x="20" y="350" fill="#4ac26b" font-size="12" font-weight="700">Permitted 4</text>
+  <text x="20" y="372" fill="#e3b341" font-size="12" font-weight="700">Conditional 8</text>
+  <text x="20" y="394" fill="#ff7b72" font-size="12" font-weight="700">Prohibited 0</text>
+  <!-- map -->
+  <rect x="320" y="0" width="600" height="470" fill="#0e2233"/>
+  <g opacity="0.5" stroke="#1f3b52"><line x1="320" y1="120" x2="920" y2="120"/><line x1="320" y1="240" x2="920" y2="240"/><line x1="320" y1="360" x2="920" y2="360"/><line x1="470" y1="0" x2="470" y2="470"/><line x1="620" y1="0" x2="620" y2="470"/><line x1="770" y1="0" x2="770" y2="470"/></g>
+  <!-- airspace rings -->
+  <circle cx="600" cy="230" r="120" fill="#2b6cb0" fill-opacity="0.10" stroke="#2b6cb0" stroke-width="1.5"/>
+  <circle cx="600" cy="230" r="70" fill="#7c3aed" fill-opacity="0.10" stroke="#7c3aed" stroke-width="1.2"/>
+  <!-- sua -->
+  <circle cx="760" cy="350" r="40" fill="#b91c1c" fill-opacity="0.14" stroke="#7f1d1d" stroke-dasharray="4 2"/>
+  <!-- zone -->
+  <circle cx="520" cy="150" r="22" fill="#d97706" fill-opacity="0.3" stroke="#b45309" stroke-width="2"/>
+  <!-- aircraft -->
+  <g stroke="#fff" stroke-width="1"><circle cx="560" cy="200" r="5" fill="#e5534b"/><circle cx="640" cy="270" r="5" fill="#e3b341"/><circle cx="700" cy="180" r="5" fill="#2ea043"/><circle cx="540" cy="300" r="5" fill="#2b6cb0"/></g>
+  <!-- clicked marker -->
+  <g><path d="M520 150 l-7 -14 a8 8 0 1 1 14 0 z" fill="#e63946" stroke="#fff" stroke-width="1.5"/></g>
+  <!-- callouts -->
+  <g font-size="11" fill="#e6edf3">
+    <rect x="610" y="120" width="150" height="18" rx="3" fill="#000" fill-opacity="0.55"/><text x="616" y="133">Class B airspace ring</text>
+    <rect x="700" y="332" width="130" height="18" rx="3" fill="#000" fill-opacity="0.55"/><text x="706" y="345">Special-use airspace</text>
+    <rect x="535" y="108" width="160" height="18" rx="3" fill="#000" fill-opacity="0.55"/><text x="541" y="121">Clicked point (your facility)</text>
+    <rect x="600" y="186" width="140" height="18" rx="3" fill="#000" fill-opacity="0.55"/><text x="606" y="199">Live aircraft (by altitude)</text>
+  </g>
+</svg>
+<div class="cap">The full screen: authority profile + layer toggles + decision report on the left; airspace, zones, special-use airspace, and live aircraft on the map.</div>
+</div>
+
+<!-- 2. PROFILE -->
+<h2 id="profile">2 · Authority profile — the master filter</h2>
+<p>This is the most important control. <b>Who you are determines what the law lets you do</b>, before any location analysis. Pick your profile and the entire report adapts.</p>
+<div class="grid2">
+  <div class="card"><b>Federal — DHS/DOJ</b> (6 U.S.C. § 124n)<br><span class="footnote">Detect + mitigate credible threats with FAA coordination.</span></div>
+  <div class="card"><b>Federal — DoD</b> (10 U.S.C. § 130i)<br><span class="footnote">Covered military installations.</span></div>
+  <div class="card"><b>Federal — DOE/NNSA</b> (FY26 NDAA § 3111)<br><span class="footnote">Nuclear-security facilities.</span></div>
+  <div class="card"><b>State/Local LE — certified</b> (SAFER SKIES)<br><span class="footnote">Limited mitigation with DOJ certification. GPS-jam, HPM, HEL stay off-limits.</span></div>
+  <div class="card"><b>State/Local LE — not certified</b><br><span class="footnote">Detection only; pursue certification.</span></div>
+  <div class="card"><b>Critical-infrastructure owner / Private security</b><br><span class="footnote">Detection only; mitigation is a federal matter — see the documentation pathway.</span></div>
+</div>
+<p>The same location returns very different answers by profile — a federal team sees a ranked menu of mitigation options; a private operator sees detection plus "here's what to file and where."</p>
+
+<!-- 3. LAYERS -->
+<h2 id="layers">3 · Map layers</h2>
+<p>Toggle layers on the left. Each one feeds the assessment — they're not just decoration.</p>
+<div class="fig">
+<svg viewBox="0 0 920 250" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Segoe UI,sans-serif">
+  <rect width="920" height="250" rx="8" fill="#0e2233"/>
+  <!-- legend swatches -->
+  <g font-size="13" fill="#e6edf3">
+    <circle cx="40" cy="40" r="9" fill="#2b6cb0" fill-opacity="0.4" stroke="#2b6cb0"/><text x="60" y="45">FAA Class B / C / D airspace (real)</text>
+    <rect x="31" y="78" width="18" height="14" fill="#b91c1c" fill-opacity="0.3" stroke="#7f1d1d" stroke-dasharray="3 2"/><text x="60" y="90">Special-use airspace (Prohibited / Restricted / MOA)</text>
+    <rect x="31" y="116" width="18" height="14" fill="#d97706" fill-opacity="0.5" stroke="#b45309"/><text x="60" y="128">Restricted zones (critical infrastructure, stadium, prison)</text>
+    <rect x="31" y="154" width="18" height="14" fill="#c98a1f" fill-opacity="0.4"/><text x="60" y="166">Population density (drives debris-risk scoring)</text>
+  </g>
+  <!-- aircraft altitude scale -->
+  <text x="500" y="30" fill="#9aa7b4" font-size="12">LIVE AIRCRAFT — colored by altitude</text>
+  <g stroke="#fff"><circle cx="510" cy="60" r="7" fill="#e5534b"/><circle cx="600" cy="60" r="7" fill="#e3b341"/><circle cx="690" cy="60" r="7" fill="#2ea043"/><circle cx="790" cy="60" r="7" fill="#2b6cb0"/></g>
+  <g font-size="11" fill="#cfd8e0"><text x="500" y="84">low /</text><text x="500" y="96">overhead</text><text x="585" y="84">~1,500 ft</text><text x="678" y="84">~5,000 ft</text><text x="772" y="84">high</text></g>
+  <text x="500" y="130" fill="#9aa7b4" font-size="12">Red = low &amp; overhead = highest collateral concern for kinetic options.</text>
+  <text x="500" y="150" fill="#9aa7b4" font-size="12">Aircraft refresh every ~15 s and when you pan the map.</text>
+  <text x="500" y="186" fill="#9aa7b4" font-size="12">Source: FAA ArcGIS (airspace) · adsb.lol / airplanes.live (aircraft).</text>
+  <line x1="40" y1="210" x2="880" y2="210" stroke="#2d3744"/>
+  <text x="40" y="234" fill="#9aa7b4" font-size="11.5">Population, buildings, and bespoke zones are sample data in this pilot; airspace and aircraft are live.</text>
+</svg>
+<div class="cap">Layer legend. Airspace and aircraft are live feeds; population/zones are pilot sample data pending the next data swap.</div>
+</div>
+
+<!-- 4. REPORT -->
+<h2 id="report">4 · The decision report</h2>
+<p>Click any point and the sidebar fills with a report in four parts: an <b>authority banner</b>, then countermeasures grouped as <span class="pill p-green">Permitted</span> <span class="pill p-amber">Conditional</span> <span class="pill p-red">Prohibited</span>, then the documentation pathway. Actionable options are ranked safest-first.</p>
+<div class="fig">
+<svg viewBox="0 0 920 430" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Segoe UI,sans-serif">
+  <rect width="920" height="430" rx="8" fill="#1a2029"/>
+  <!-- banner -->
+  <rect x="20" y="18" width="880" height="44" rx="6" fill="#222a35" stroke="#7c3aed"/>
+  <text x="34" y="38" fill="#e6edf3" font-size="12.5">Certified SLTT authority (SAFER SKIES): limited mitigation of credible threats with DOJ</text>
+  <text x="34" y="54" fill="#e6edf3" font-size="12.5">certification + FAA coordination. GPS jam/spoof, HPM, and HEL remain OUTSIDE this authority.</text>
+  <!-- location summary -->
+  <text x="20" y="84" fill="#e6edf3" font-size="13" font-weight="700">Dallas Class B · airspace B · nearest DFW (0.0 nm) · pop. high · 12 aircraft nearby</text>
+  <!-- permitted -->
+  <text x="20" y="112" fill="#4ac26b" font-size="13" font-weight="700">Permitted <tspan fill="#9aa7b4">4</tspan></text>
+  <rect x="20" y="120" width="430" height="46" rx="6" fill="#222a35" stroke="#2d3744"/>
+  <text x="32" y="139" fill="#e6edf3" font-size="12.5" font-weight="600">RF detection / direction-finding</text>
+  <rect x="360" y="126" width="80" height="16" rx="8" fill="rgba(46,160,67,.18)"/><text x="368" y="138" fill="#4ac26b" font-size="10.5">risk 12 · low</text>
+  <text x="32" y="156" fill="#9aa7b4" font-size="10.5">Passive; do not decode the control link (Wiretap/Pen-Trap).</text>
+  <!-- conditional -->
+  <text x="20" y="194" fill="#e3b341" font-size="13" font-weight="700">Conditional <tspan fill="#9aa7b4">— requires the listed conditions · 5</tspan></text>
+  <rect x="20" y="202" width="430" height="64" rx="6" fill="#222a35" stroke="#2d3744"/>
+  <text x="32" y="221" fill="#e6edf3" font-size="12.5" font-weight="600">Kinetic (projectiles / firearms)</text>
+  <rect x="360" y="208" width="80" height="16" rx="8" fill="rgba(229,83,75,.18)"/><text x="368" y="220" fill="#ff7b72" font-size="10.5">risk 100 · high</text>
+  <text x="32" y="238" fill="#9aa7b4" font-size="10">Conditions: credible_threat, faa_coordination, doj_certification, clear_fall_zone</text>
+  <text x="32" y="252" fill="#9aa7b4" font-size="10">Drivers: high-density area · manned aircraft 0.9 nm @ 525 ft · within 0.0 nm of DFW</text>
+  <rect x="32" y="258" width="120" height="0" />
+  <text x="32" y="264" fill="#79c0ff" font-size="10">18 U.S.C. § 32</text>
+  <!-- prohibited -->
+  <text x="470" y="112" fill="#ff7b72" font-size="13" font-weight="700">Prohibited <tspan fill="#9aa7b4">3</tspan></text>
+  <rect x="470" y="120" width="430" height="40" rx="6" fill="#222a35" stroke="#2d3744"/>
+  <text x="482" y="139" fill="#e6edf3" font-size="12.5" font-weight="600">GNSS/GPS jamming or spoofing</text>
+  <text x="482" y="153" fill="#9aa7b4" font-size="10">Not in the SLTT pathway; uncontainable aviation effects. 47 U.S.C. § 333; 49 U.S.C. § 46307</text>
+  <rect x="470" y="166" width="430" height="40" rx="6" fill="#222a35" stroke="#2d3744"/>
+  <text x="482" y="185" fill="#e6edf3" font-size="12.5" font-weight="600">High-power microwave (HPM)</text>
+  <text x="482" y="199" fill="#9aa7b4" font-size="10">Federal/military only. 47 U.S.C. § 302a; § 333</text>
+  <!-- doc pathway -->
+  <text x="470" y="236" fill="#e6edf3" font-size="13" font-weight="700">Documentation &amp; coordination pathway</text>
+  <rect x="470" y="244" width="430" height="40" rx="6" fill="#222a35" stroke="#2d3744"/>
+  <text x="482" y="263" fill="#79c0ff" font-size="12" font-weight="600">Establish real-time FAA coordination</text>
+  <text x="482" y="277" fill="#9aa7b4" font-size="10">Authorized mitigation requires FAA deconfliction before action.</text>
+  <!-- footer -->
+  <line x1="20" y1="372" x2="900" y2="372" stroke="#2d3744"/>
+  <text x="20" y="392" fill="#e3b341" font-size="10.5">DECISION SUPPORT ONLY — NOT LEGAL ADVICE. Verify with counsel; coordinate with federal authorities.</text>
+  <text x="20" y="410" fill="#9aa7b4" font-size="10.5">Rules DB 2026.06-mvp · generated 2026-06-13</text>
+</svg>
+<div class="cap">A decision report for a certified state/local LE profile at DFW. Note the SAFER-SKIES carve-out (GPS-jam/HPM stay prohibited) and the live-aircraft risk driver.</div>
+</div>
+<p>Every countermeasure card carries its <b>legal citation</b> as a clickable chip (e.g. <code>18 U.S.C. § 32</code>), its <b>conditions</b>, and a <b>risk score</b>. The footer stamps the rules-database version and date — because the law changes.</p>
+
+<!-- 5. RISK -->
+<h2 id="risk">5 · Collateral-risk scoring</h2>
+<p>Each actionable countermeasure gets a 0–100 collateral-risk score and a band, with the top drivers shown. The model reflects how each method actually fails at this location:</p>
+<div class="grid2">
+  <div class="card"><b>Kinetic / net / interceptor</b> — falling-debris &amp; ballistic fall-zone vs. population density; a manned aircraft within 5 nm and below 1,000 ft pushes risk sharply up.</div>
+  <div class="card"><b>RF jamming / HPM</b> — interference radius vs. nearby cellular, GPS, Wi-Fi and public-safety comms; worse in dense RF environments and near airports.</div>
+  <div class="card"><b>GNSS jam/spoof</b> — near-always high: GPS effects can't be contained and hit aviation and timing.</div>
+  <div class="card"><b>Detection (RF / radar / EO-IR / acoustic)</b> — minimal collateral, scored low.</div>
+</div>
+<p style="margin-top:12px">
+  <span class="pill p-green">low 0–33</span>&nbsp;
+  <span class="pill p-amber">medium 34–66</span>&nbsp;
+  <span class="pill p-red">high 67–100</span>
+  &nbsp;<span class="footnote">Transparent heuristics for decision support — not engineering models.</span>
+</p>
+
+<!-- 6. DOCS -->
+<h2 id="docs">6 · Documentation &amp; coordination pathway</h2>
+<p>When you can't lawfully act, the most useful output is <b>what to file and where</b>. The tool assembles the pathway from your profile and the location:</p>
+<ul>
+  <li><b>Report the incursion</b> — FBI field office / DHS, so authorized teams can respond.</li>
+  <li><b>FAA § 2209 fixed-site petition</b> (proposed Part 74) — establish a UAS no-fly designation over your facility.</li>
+  <li><b>§ 99.7 Special Security Instruction</b> — for national-security-sensitive sites, via your sponsoring federal agency.</li>
+  <li><b>SAFER SKIES certification</b> — the path for state/local LE to gain lawful mitigation authority.</li>
+  <li><b>FEMA C-UAS grant</b> — federal funding for approved capability.</li>
+  <li><b>Texas DPS / iWatch Texas</b> — when the drone is over Texas critical infrastructure (Gov't Code ch. 423).</li>
+</ul>
+<p>Each item links to the authoritative source.</p>
+
+<!-- 7. FLOW -->
+<h2 id="flow">7 · How a decision is made</h2>
+<div class="fig">
+<svg viewBox="0 0 920 220" xmlns="http://www.w3.org/2000/svg" font-family="system-ui,Segoe UI,sans-serif">
+  <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="7" refY="4.5" orient="auto"><path d="M0 0 L9 4.5 L0 9 z" fill="#7c3aed"/></marker></defs>
+  <g font-size="12">
+    <rect x="20" y="80" width="150" height="60" rx="8" fill="#222a35" stroke="#2d3744"/>
+    <text x="95" y="104" fill="#e6edf3" text-anchor="middle">Profile +</text>
+    <text x="95" y="122" fill="#e6edf3" text-anchor="middle">clicked location</text>
+
+    <rect x="220" y="60" width="180" height="100" rx="8" fill="#222a35" stroke="#2d3744"/>
+    <text x="310" y="86" fill="#9aa7b4" text-anchor="middle" font-size="10">GATHER ATTRIBUTES</text>
+    <text x="310" y="106" fill="#e6edf3" text-anchor="middle" font-size="11">airspace · airport</text>
+    <text x="310" y="122" fill="#e6edf3" text-anchor="middle" font-size="11">population · zones</text>
+    <text x="310" y="138" fill="#e6edf3" text-anchor="middle" font-size="11">live aircraft · TFRs</text>
+
+    <rect x="450" y="60" width="180" height="100" rx="8" fill="#222a35" stroke="#7c3aed"/>
+    <text x="540" y="86" fill="#9aa7b4" text-anchor="middle" font-size="10">RULES ENGINE</text>
+    <text x="540" y="106" fill="#e6edf3" text-anchor="middle" font-size="11">federal ∩ Texas ∩</text>
+    <text x="540" y="122" fill="#e6edf3" text-anchor="middle" font-size="11">profile · most-</text>
+    <text x="540" y="138" fill="#e6edf3" text-anchor="middle" font-size="11">restrictive-wins</text>
+
+    <rect x="680" y="40" width="150" height="46" rx="8" fill="#222a35" stroke="#2d3744"/>
+    <text x="755" y="60" fill="#9aa7b4" text-anchor="middle" font-size="10">RISK SCORING</text>
+    <text x="755" y="77" fill="#e6edf3" text-anchor="middle" font-size="11">per option</text>
+
+    <rect x="680" y="134" width="150" height="46" rx="8" fill="#222a35" stroke="#2d3744"/>
+    <text x="755" y="154" fill="#9aa7b4" text-anchor="middle" font-size="10">DECISION REPORT</text>
+    <text x="755" y="171" fill="#e6edf3" text-anchor="middle" font-size="11">+ doc pathway</text>
+  </g>
+  <g stroke="#7c3aed" stroke-width="2" fill="none">
+    <line x1="170" y1="110" x2="216" y2="110" marker-end="url(#ar)"/>
+    <line x1="400" y1="110" x2="446" y2="110" marker-end="url(#ar)"/>
+    <line x1="630" y1="95" x2="676" y2="70" marker-end="url(#ar)"/>
+    <line x1="630" y1="125" x2="676" y2="150" marker-end="url(#ar)"/>
+  </g>
+</svg>
+<div class="cap">The pipeline behind every click: gather location attributes → apply the cited rules database → score risk → assemble the report.</div>
+</div>
+
+<!-- 8. LIMITS -->
+<h2 id="limits">8 · What it is — and isn't</h2>
+<div class="grid2">
+  <div class="card"><b>It is</b><br>A planning / course-of-action aid that makes a complex, multi-variable legal and safety judgment faster and more defensible — with citations and an audit trail.</div>
+  <div class="card"><b>It isn't</b><br>An authorization system or a real-time fire-control tool. Live aircraft are situational awareness, not a clearance to engage.</div>
+</div>
+<div class="disclaimer">The legal rules database is the tool's most valuable — and most perishable — asset. It must be reviewed by counsel before any operational reliance, and it carries an "as-of" date on every rule. Authorities sunset; new rulemakings are pending.</div>
+<p class="footnote">Pilot scope: Texas, federal + Tex. Gov't Code ch. 423. Live data: FAA airspace, community ADS-B. Sample data: population, buildings, bespoke zones.</p>
+
+</div>
+</body>
+</html>

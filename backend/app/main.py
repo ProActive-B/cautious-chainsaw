@@ -86,7 +86,7 @@ async def debug_aircraft() -> dict:
 async def assess(req: AssessRequest) -> DecisionReport:
     """Core endpoint: location + profile -> decision report (with live feeds)."""
     bbox = (req.lat - _ASSESS_BOX, req.lon - _ASSESS_BOX, req.lat + _ASSESS_BOX, req.lon + _ASSESS_BOX)
-    air = await opensky.fetch_aircraft(*bbox)
+    air = await adsb.fetch_aircraft(*bbox)
     tfr = await notam.fetch_tfrs(*bbox)
     loc = gather(req.lat, req.lon, aircraft=air, tfr_result=tfr)
     return build_report(req, loc)
