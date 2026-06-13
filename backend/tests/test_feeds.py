@@ -54,6 +54,16 @@ def test_nearby_aircraft_filtering():
     assert "grnd1" not in ids      # on ground
 
 
+def test_nearby_aircraft_tolerates_null_icao24_and_alt():
+    # Community feeds (TIS-B/MLAT) can omit hex/altitude — must not 500 an assess.
+    aircraft = [
+        {"icao24": None, "callsign": "TISB", "lat": 32.95, "lon": -96.66, "alt_ft": 800, "on_ground": False},
+        {"icao24": "abc123", "callsign": None, "lat": 32.95, "lon": -96.66, "alt_ft": None, "on_ground": False},
+    ]
+    loc = gather(32.95, -96.65, aircraft=aircraft)
+    assert len(loc.nearby_aircraft) == 2
+
+
 def test_tfr_note_surfaced_when_unconfigured():
     tfr = {"configured": False, "tfrs": [], "note": "TFR feed not configured."}
     loc = gather(32.95, -96.65, tfr_result=tfr)

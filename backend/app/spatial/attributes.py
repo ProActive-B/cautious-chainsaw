@@ -123,15 +123,19 @@ def _nearby_aircraft(lat: float, lon: float, aircraft: list[dict]) -> list[Nearb
         if ac.get("on_ground") or ac.get("lat") is None or ac.get("lon") is None:
             continue
         d = haversine_nm(lat, lon, ac["lat"], ac["lon"])
-        if d <= AIRCRAFT_RADIUS_NM:
+        if d > AIRCRAFT_RADIUS_NM:
+            continue
+        try:
             out.append(
                 NearbyAircraft(
-                    icao24=ac["icao24"],
+                    icao24=ac.get("icao24"),
                     callsign=ac.get("callsign"),
                     distance_nm=round(d, 1),
                     altitude_ft_agl=ac.get("alt_ft"),
                 )
             )
+        except Exception:  # noqa: BLE001 — one malformed feed entry must not 500 an assessment
+            continue
     out.sort(key=lambda a: a.distance_nm)
     return out[:12]
 

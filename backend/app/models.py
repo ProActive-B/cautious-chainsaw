@@ -66,7 +66,8 @@ class AssessRequest(BaseModel):
 # Location attributes (output of the spatial layer)
 # --------------------------------------------------------------------------- #
 class NearbyAircraft(BaseModel):
-    icao24: str
+    # icao24 is optional: some community-feed targets (TIS-B/MLAT) lack a hex id.
+    icao24: Optional[str] = None
     callsign: Optional[str] = None
     distance_nm: float
     altitude_ft_agl: Optional[float] = None
