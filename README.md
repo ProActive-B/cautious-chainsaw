@@ -12,15 +12,20 @@ collateral-**risk score** for each actionable option, and the
 > counsel and coordinate with federal authorities before any action.
 > See [docs/SOURCES.md](docs/SOURCES.md).
 
-## Status (MVP)
+## Status
 - ✅ Rules engine + cited YAML legal DB (federal + Texas), most-restrictive-wins
 - ✅ Authority-profile master filter (7 profiles)
 - ✅ Collateral risk scoring (debris/RF/GPS/laser/aviation-deconfliction)
 - ✅ Documentation pathway generator
 - ✅ React + MapLibre frontend (click-to-assess, layer toggles)
-- ⏳ **Phase 2:** live TFR/NOTAM + ADS-B feeds; real FAA/Census/building/terrain
-  layers (current map data is approximate **sample** staging data)
+- ✅ **Phase 2 — live feeds & real airspace:** live ADS-B aircraft (OpenSky) feed
+  overhead-traffic into the risk score; **real FAA Class B/C/D + Special Use
+  Airspace** for Texas drive the authoritative airspace class. TFR/NOTAM client
+  is wired but key-gated (set `FAA_NOTAM_API_KEY`). Population/buildings/terrain
+  and bespoke zones are still **sample** data — next to replace.
 - ⏳ **Phase 4:** TAK (ATAK/WinTAK) export; offline/on-prem bundles
+
+Refresh the staged FAA airspace anytime: `python backend/scripts/stage_faa_texas.py`.
 
 Pilot scope: **Texas** (federal + Tex. Gov't Code ch. 423), sample data centered
 on the Dallas–Fort Worth area.

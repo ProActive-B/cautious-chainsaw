@@ -11,8 +11,10 @@ interface Props {
 }
 
 const LAYER_LABELS: Record<string, string> = {
+  aircraft: "Live aircraft (ADS-B)",
+  airspace: "Airspace (FAA Class B/C/D)",
+  sua: "Special-use airspace",
   population: "Population density",
-  airspace: "Airspace / airports",
   zones: "Restricted zones",
   sites: "Pilot site",
 };

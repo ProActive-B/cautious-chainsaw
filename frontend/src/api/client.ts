@@ -1,4 +1,4 @@
-import type { DecisionReport, Layers, Meta } from "../types";
+import type { AircraftResponse, DecisionReport, Layers, Meta } from "../types";
 
 async function getJSON<T>(url: string): Promise<T> {
   const res = await fetch(url);
@@ -9,6 +9,10 @@ async function getJSON<T>(url: string): Promise<T> {
 export const api = {
   meta: () => getJSON<Meta>("/api/meta"),
   layers: () => getJSON<Layers>("/api/layers"),
+  aircraft: (b: { s: number; w: number; n: number; e: number }) =>
+    getJSON<AircraftResponse>(
+      `/api/aircraft?lamin=${b.s}&lomin=${b.w}&lamax=${b.n}&lomax=${b.e}`,
+    ),
   assess: async (
     profile: string,
     lat: number,

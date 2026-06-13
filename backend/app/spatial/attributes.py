@@ -1,14 +1,22 @@
 """Gather location attributes for a clicked point.
 
-Produces the LocationAttributes that the rules engine and risk scoring consume:
-airspace class, nearest airport, population/building/RF bands, and boolean zone
-flags (e.g. critical_infrastructure_zone) that trigger location-predicated rules.
+Produces the LocationAttributes that the rules engine and risk scoring consume.
+Airspace comes from live FAA data when staged (backend/data/faa/), falling back
+to the sample seed circles otherwise. Population, buildings, and bespoke zones
+(critical-infrastructure, stadium, etc.) still come from the seed pending real
+data. Live aircraft and TFRs are passed in by the API layer (kept out of here so
+this stays pure and unit-testable without network).
 """
 
 from __future__ import annotations
 
+from shapely.geometry import Point, shape
+
+from ..feeds import faa
 from ..models import LocationAttributes, NearbyAircraft
 from .seed import haversine_nm, load_seed
+
+AIRCRAFT_RADIUS_NM = 10.0
 
 
 def _band_from_density(density: float | None) -> str | None:
@@ -21,50 +29,41 @@ def _band_from_density(density: float | None) -> str | None:
     return "low"
 
 
-def gather(lat: float, lon: float, aircraft: list[NearbyAircraft] | None = None) -> LocationAttributes:
+def gather(
+    lat: float,
+    lon: float,
+    aircraft: list[dict] | None = None,
+    tfr_result: dict | None = None,
+) -> LocationAttributes:
     seed = load_seed()
-    notes: list[str] = [
-        "Attributes derived from SAMPLE pilot staging data; not authoritative."
-    ]
+    notes: list[str] = []
+    flags: dict[str, bool] = {}
 
-    # --- Airspace + nearest airport ---
-    airspace_class: str | None = None
-    uasfm_ceiling: int | None = None
-    nearest_airport: str | None = None
-    nearest_dist: float | None = None
+    airspace_class, uasfm_ceiling, nearest_airport, nearest_dist = _airspace(lat, lon, seed, flags, notes)
 
-    for ap in seed.get("airports", []):
-        d = haversine_nm(lat, lon, ap["lat"], ap["lon"])
-        if nearest_dist is None or d < nearest_dist:
-            nearest_dist = d
-            nearest_airport = f"{ap['name']} ({ap['ident']})"
-        if d <= ap["radius_nm"]:
-            # Innermost controlled airspace wins (smaller radius = closer-in).
-            if airspace_class is None or ap["radius_nm"] < _radius_of(seed, airspace_class):
-                airspace_class = ap["airspace_class"]
-                uasfm_ceiling = ap.get("uasfm_ceiling_ft")
-    if airspace_class is None:
-        airspace_class = "G/E"  # uncontrolled / general
-
-    # --- Population / building / RF bands ---
+    # --- Population / building / RF bands (still sample data) ---
     density: float | None = None
     place_label = "Texas (sample area)"
     for area in seed.get("population_areas", []):
         if haversine_nm(lat, lon, area["lat"], area["lon"]) <= area["radius_nm"]:
-            # Densest containing area wins.
             if density is None or area["density_per_km2"] > density:
                 density = area["density_per_km2"]
                 place_label = area["label"]
     pop_band = _band_from_density(density)
     rf_congestion = "high" if (pop_band == "high" or (nearest_dist or 99) < 5) else pop_band
 
-    # --- Zone flags ---
-    flags: dict[str, bool] = {}
+    # --- Bespoke zones (critical infrastructure, stadium, ...) from seed ---
     for zone in seed.get("zones", []):
         if haversine_nm(lat, lon, zone["lat"], zone["lon"]) <= zone["radius_nm"]:
             flags[zone["flag"]] = True
             place_label = zone["label"]
             notes.append(f"Inside zone: {zone['label']}")
+
+    # --- Live aircraft (provided by API) ---
+    nearby = _nearby_aircraft(lat, lon, aircraft or [])
+
+    # --- TFRs (provided by API) ---
+    active_tfr, tfr_names = _tfrs(lat, lon, tfr_result, notes)
 
     return LocationAttributes(
         lat=lat,
@@ -78,9 +77,78 @@ def gather(lat: float, lon: float, aircraft: list[NearbyAircraft] | None = None)
         building_density=pop_band,
         rf_congestion=rf_congestion,
         location_flags=flags,
-        nearby_aircraft=aircraft or [],
+        active_tfr=active_tfr,
+        active_tfr_names=tfr_names,
+        nearby_aircraft=nearby,
         notes=notes,
     )
+
+
+def _airspace(lat, lon, seed, flags, notes):
+    """Return (airspace_class, uasfm_ceiling_ft, nearest_airport, nearest_dist_nm)."""
+    if faa.has_data():
+        inside = faa.airspace_at(lat, lon)
+        if inside:
+            notes.append(f"Inside Class {inside['class']} airspace ({inside['name']}).")
+            airspace_class, nearest_airport, nearest_dist = inside["class"], inside["name"], 0.0
+        else:
+            airspace_class = "E/G"
+            nc = faa.nearest_controlled(lat, lon)
+            nearest_airport, nearest_dist = (nc[0], nc[1]) if nc else (None, None)
+        for s in faa.sua_at(lat, lon):
+            flags["special_use_airspace"] = True
+            notes.append(f"Special-use airspace: {s['name']} ({s['type']})")
+        notes.append("Airspace from live FAA data; population/zones are sample data.")
+        return airspace_class, None, nearest_airport, nearest_dist
+
+    # Fallback: sample seed circles.
+    notes.append("Attributes derived from SAMPLE pilot staging data; not authoritative.")
+    airspace_class, uasfm_ceiling, nearest_airport, nearest_dist = None, None, None, None
+    for ap in seed.get("airports", []):
+        d = haversine_nm(lat, lon, ap["lat"], ap["lon"])
+        if nearest_dist is None or d < nearest_dist:
+            nearest_dist = d
+            nearest_airport = f"{ap['name']} ({ap['ident']})"
+        if d <= ap["radius_nm"] and (airspace_class is None or ap["radius_nm"] < _radius_of(seed, airspace_class)):
+            airspace_class = ap["airspace_class"]
+            uasfm_ceiling = ap.get("uasfm_ceiling_ft")
+    if airspace_class is None:
+        airspace_class = "G/E"
+    return airspace_class, uasfm_ceiling, nearest_airport, nearest_dist
+
+
+def _nearby_aircraft(lat: float, lon: float, aircraft: list[dict]) -> list[NearbyAircraft]:
+    out: list[NearbyAircraft] = []
+    for ac in aircraft:
+        if ac.get("on_ground") or ac.get("lat") is None or ac.get("lon") is None:
+            continue
+        d = haversine_nm(lat, lon, ac["lat"], ac["lon"])
+        if d <= AIRCRAFT_RADIUS_NM:
+            out.append(
+                NearbyAircraft(
+                    icao24=ac["icao24"],
+                    callsign=ac.get("callsign"),
+                    distance_nm=round(d, 1),
+                    altitude_ft_agl=ac.get("alt_ft"),
+                )
+            )
+    out.sort(key=lambda a: a.distance_nm)
+    return out[:12]
+
+
+def _tfrs(lat, lon, tfr_result, notes) -> tuple[bool, list[str]]:
+    if not tfr_result:
+        return False, []
+    if tfr_result.get("note"):
+        notes.append(tfr_result["note"])
+    active, names = False, []
+    pt = Point(lon, lat)
+    for t in tfr_result.get("tfrs", []):
+        geom = t.get("geometry")
+        if geom is None or shape(geom).contains(pt):
+            active = True
+            names.append(t["name"])
+    return active, names
 
 
 def _radius_of(seed: dict, airspace_class: str) -> float:

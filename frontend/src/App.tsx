@@ -11,7 +11,7 @@ export function App() {
   const [profile, setProfile] = useState<string>("");
   const [credibleThreat, setCredibleThreat] = useState(false);
   const [layerVisibility, setLayerVisibility] = useState<Record<string, boolean>>({
-    population: true, airspace: true, zones: true, sites: true,
+    aircraft: true, airspace: true, sua: true, population: true, zones: true, sites: true,
   });
   const [picked, setPicked] = useState<{ lat: number; lon: number } | null>(null);
   const [report, setReport] = useState<DecisionReport | null>(null);

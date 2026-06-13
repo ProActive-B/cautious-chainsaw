@@ -84,7 +84,23 @@ export interface Meta {
 
 export interface Layers {
   airspace: FeatureCollection;
+  sua: FeatureCollection;
   zones: FeatureCollection;
   population: FeatureCollection;
   sites: FeatureCollection;
+}
+
+export interface Aircraft {
+  icao24: string;
+  callsign?: string | null;
+  lat: number;
+  lon: number;
+  alt_ft?: number | null;
+  on_ground: boolean;
+  track?: number | null;
+}
+
+export interface AircraftResponse {
+  count: number;
+  aircraft: Aircraft[];
 }

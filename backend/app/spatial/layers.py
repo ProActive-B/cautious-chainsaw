@@ -1,11 +1,17 @@
-"""Build GeoJSON FeatureCollections for the map from the same seed definitions.
+"""Build GeoJSON FeatureCollections for the map.
 
-One source of truth (data/seed/tx_pilot.json) drives both the attribute logic
-and what the user sees, so the map never disagrees with the assessment.
+Airspace + special-use airspace come from the staged live FAA data when present
+(annotated for styling/popups); zones, population, and the pilot site come from
+the seed. Falls back to seed airspace circles when FAA data isn't staged.
 """
 
 from __future__ import annotations
 
+import functools
+import json
+
+from ..config import settings
+from ..feeds import faa
 from .seed import geodesic_circle, load_seed
 
 
@@ -25,48 +31,58 @@ def _point_feature(lat: float, lon: float, props: dict) -> dict:
     }
 
 
+@functools.lru_cache(maxsize=2)
+def _faa_fc(filename: str, kind: str) -> dict:
+    """Load a staged FAA GeoJSON file and annotate features for the map."""
+    data = json.loads((settings.data_dir / "faa" / filename).read_text(encoding="utf-8"))
+    for feat in data.get("features", []):
+        p = feat.setdefault("properties", {})
+        name = (p.get("NAME") or "").title()
+        if kind == "airspace":
+            p["kind"] = "airspace"
+            p["airspace_class"] = p.get("CLASS")
+            p["label"] = f"Class {p.get('CLASS')} — {name}"
+        else:
+            p["kind"] = "sua"
+            p["label"] = f"{p.get('TYPE_CODE') or 'SUA'}: {name}"
+    return data
+
+
 def build_layers() -> dict[str, dict]:
     seed = load_seed()
-    layers: dict[str, list[dict]] = {
-        "airspace": [],
-        "zones": [],
-        "population": [],
-        "sites": [],
-    }
 
-    for ap in seed.get("airports", []):
-        layers["airspace"].append(
-            _circle_feature(
-                ap["lat"], ap["lon"], ap["radius_nm"],
-                {"kind": "airspace", "airspace_class": ap["airspace_class"],
-                 "label": f"Class {ap['airspace_class']} — {ap['name']}",
-                 "ident": ap["ident"], "uasfm_ceiling_ft": ap.get("uasfm_ceiling_ft")},
-            )
-        )
-
-    for area in seed.get("population_areas", []):
-        layers["population"].append(
-            _circle_feature(
-                area["lat"], area["lon"], area["radius_nm"],
-                {"kind": "population", "label": area["label"],
-                 "density_per_km2": area["density_per_km2"]},
-            )
-        )
-
-    for zone in seed.get("zones", []):
-        layers["zones"].append(
-            _circle_feature(
-                zone["lat"], zone["lon"], zone["radius_nm"],
-                {"kind": "zone", "flag": zone["flag"], "label": zone["label"]},
-            )
-        )
-
+    population = [
+        _circle_feature(a["lat"], a["lon"], a["radius_nm"],
+                        {"kind": "population", "label": a["label"], "density_per_km2": a["density_per_km2"]})
+        for a in seed.get("population_areas", [])
+    ]
+    zones = [
+        _circle_feature(z["lat"], z["lon"], z["radius_nm"],
+                        {"kind": "zone", "flag": z["flag"], "label": z["label"]})
+        for z in seed.get("zones", [])
+    ]
     site = seed["pilot_site"]
-    layers["sites"].append(
-        _point_feature(site["lat"], site["lon"], {"kind": "site", "label": site["label"]})
-    )
+    sites = [_point_feature(site["lat"], site["lon"], {"kind": "site", "label": site["label"]})]
+
+    if faa.has_data():
+        airspace = _faa_fc("class_airspace_tx.geojson", "airspace")
+        sua = _faa_fc("sua_tx.geojson", "sua")
+    else:
+        airspace = {
+            "type": "FeatureCollection",
+            "features": [
+                _circle_feature(ap["lat"], ap["lon"], ap["radius_nm"],
+                                {"kind": "airspace", "airspace_class": ap["airspace_class"],
+                                 "label": f"Class {ap['airspace_class']} — {ap['name']}"})
+                for ap in seed.get("airports", [])
+            ],
+        }
+        sua = {"type": "FeatureCollection", "features": []}
 
     return {
-        name: {"type": "FeatureCollection", "features": feats}
-        for name, feats in layers.items()
+        "airspace": airspace,
+        "sua": sua,
+        "population": {"type": "FeatureCollection", "features": population},
+        "zones": {"type": "FeatureCollection", "features": zones},
+        "sites": {"type": "FeatureCollection", "features": sites},
     }
