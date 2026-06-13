@@ -75,6 +75,13 @@ async def aircraft(
     return {"count": len(data), "aircraft": data}
 
 
+@app.get("/api/_debug/opensky")
+async def debug_opensky() -> dict:
+    """Diagnostics for the live aircraft feed (no secrets) — why is it empty?"""
+    await opensky.fetch_aircraft(32.6, -97.2, 33.1, -96.5, use_cache=False)
+    return opensky.last_status
+
+
 @app.post("/api/assess", response_model=DecisionReport)
 async def assess(req: AssessRequest) -> DecisionReport:
     """Core endpoint: location + profile -> decision report (with live feeds)."""
