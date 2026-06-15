@@ -29,7 +29,9 @@ collateral-**risk score** for each actionable option, and the
 - ✅ **Phase 4 — TAK export:** export an assessment as **Cursor-on-Target (CoT)**
   and as an importable **TAK data package** (`.zip`) for ATAK/WinTAK (the marker
   carries the decision summary in its remarks); live aircraft as a CoT stream
-  (`/api/cot/aircraft`). "Export to TAK" button in the report panel.
+  (`/api/cot/aircraft`). "Export to TAK" button + a **QR code** in the report panel
+  (scan with a phone → downloads the package → import in ATAK). Android steps:
+  [docs/TAK_ATAK_IMPORT.md](docs/TAK_ATAK_IMPORT.md).
 - ⏳ **Next:** offline/on-prem (PWA + bundled data); live TFR key; counsel review.
 
 Refresh the staged FAA airspace anytime: `python backend/scripts/stage_faa_texas.py`.

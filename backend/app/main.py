@@ -18,7 +18,7 @@ from .rules.loader import load_rules
 from .spatial.attributes import gather
 from .spatial.layers import build_layers
 from .spatial.seed import load_seed
-from .taxonomy import COUNTERMEASURE_LABELS, PROFILE_LABELS
+from .taxonomy import COUNTERMEASURE_LABELS, PROFILE_LABELS, Profile
 
 app = FastAPI(title=settings.app_name, version=__version__)
 
@@ -120,9 +120,7 @@ async def cot_assessment(req: AssessRequest) -> Response:
     return Response(content=cot.assessment_cot(report), media_type="application/xml")
 
 
-@app.post("/api/tak/datapackage")
-async def tak_datapackage(req: AssessRequest) -> Response:
-    """Assessment as a TAK data package (.zip) for ATAK/WinTAK file import."""
+async def _tak_package_response(req: AssessRequest) -> Response:
     report = await _run_assess(req)
     uid = f"CUAS.{req.lat:.4f}_{req.lon:.4f}"
     pkg = datapackage.build_package(cot.assessment_cot(report, uid=uid), uid=uid)
@@ -130,6 +128,25 @@ async def tak_datapackage(req: AssessRequest) -> Response:
         content=pkg,
         media_type="application/zip",
         headers={"Content-Disposition": 'attachment; filename="cuas-assessment.zip"'},
+    )
+
+
+@app.post("/api/tak/datapackage")
+async def tak_datapackage(req: AssessRequest) -> Response:
+    """Assessment as a TAK data package (.zip) for ATAK/WinTAK file import."""
+    return await _tak_package_response(req)
+
+
+@app.get("/api/tak/datapackage")
+async def tak_datapackage_get(
+    profile: Profile = Query(...),
+    lat: float = Query(..., ge=-90, le=90),
+    lon: float = Query(..., ge=-180, le=180),
+    credible_threat: bool = Query(False),
+) -> Response:
+    """GET variant so a plain link/QR code downloads the package on a phone."""
+    return await _tak_package_response(
+        AssessRequest(profile=profile, lat=lat, lon=lon, credible_threat=credible_threat)
     )
 
 

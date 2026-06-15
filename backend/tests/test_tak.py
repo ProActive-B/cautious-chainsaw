@@ -91,6 +91,15 @@ def test_datapackage_endpoint(monkeypatch):
     assert "MANIFEST/manifest.xml" in z.namelist()
 
 
+def test_datapackage_get_endpoint(monkeypatch):
+    _stub(monkeypatch)
+    r = client.get("/api/tak/datapackage?profile=ci_owner&lat=32.95&lon=-96.65")
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "application/zip"
+    z = zipfile.ZipFile(io.BytesIO(r.content))
+    assert "assessment.cot" in z.namelist()
+
+
 def test_cot_aircraft_endpoint(monkeypatch):
     _stub(monkeypatch)
     r = client.get("/api/cot/aircraft?lamin=32&lomin=-98&lamax=33&lomax=-96")

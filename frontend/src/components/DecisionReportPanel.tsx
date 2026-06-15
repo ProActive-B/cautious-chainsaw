@@ -1,5 +1,25 @@
+import { useEffect, useState } from "react";
+import QRCode from "qrcode";
 import { api } from "../api/client";
 import type { CountermeasureAssessment, DecisionReport } from "../types";
+
+function TakQr({ report }: { report: DecisionReport }) {
+  const [src, setSrc] = useState("");
+  const url =
+    `${window.location.origin}/api/tak/datapackage` +
+    `?profile=${encodeURIComponent(report.profile)}` +
+    `&lat=${report.location.lat}&lon=${report.location.lon}`;
+  useEffect(() => {
+    QRCode.toDataURL(url, { margin: 1, width: 140 }).then(setSrc).catch(() => setSrc(""));
+  }, [url]);
+  if (!src) return null;
+  return (
+    <div className="tak-qr">
+      <img src={src} alt="Scan to load this assessment in ATAK" width={140} height={140} />
+      <div className="tak-qr-cap">Scan with your phone → downloads the data package → import in ATAK.</div>
+    </div>
+  );
+}
 
 async function exportTak(report: DecisionReport) {
   try {
@@ -64,6 +84,7 @@ export function DecisionReportPanel({ report }: { report: DecisionReport }) {
       <button className="tak-btn" onClick={() => exportTak(report)} title="Download a TAK data package (ATAK/WinTAK)">
         ⤓ Export to TAK (ATAK/WinTAK)
       </button>
+      <TakQr report={report} />
 
       <div className="loc-summary">
         <div className="loc-title">{loc.place_label}</div>
