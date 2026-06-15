@@ -4,13 +4,14 @@ from __future__ import annotations
 
 import asyncio
 
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 from . import __version__
 from .config import settings
 from .feeds import adsb, buildings, census, faa, notam, terrain as terrain_feed
+from .tak import cot, datapackage
 from .models import AssessRequest, DecisionReport
 from .report import build_report
 from .rules.loader import load_rules
@@ -47,6 +48,7 @@ def health() -> dict:
             "buildings_source": "OpenStreetMap / Overpass (live, keyless)",
             "terrain_source": "USGS 3DEP (live, keyless)",
             "tfr_configured": bool(settings.faa_notam_api_key),
+            "tak_export": True,
         },
     }
 
@@ -87,11 +89,10 @@ async def debug_aircraft() -> dict:
     return adsb.last_status
 
 
-@app.post("/api/assess", response_model=DecisionReport)
-async def assess(req: AssessRequest) -> DecisionReport:
-    """Core endpoint: location + profile -> decision report (with live feeds)."""
+async def _run_assess(req: AssessRequest) -> DecisionReport:
+    """Shared pipeline: fetch all live feeds concurrently and build the report."""
     bbox = (req.lat - _ASSESS_BOX, req.lon - _ASSESS_BOX, req.lat + _ASSESS_BOX, req.lon + _ASSESS_BOX)
-    # Fetch all live feeds concurrently; each fails safe to None/[] internally.
+    # Each feed fails safe to None/[] internally.
     air, tfr, pop, bld, terr = await asyncio.gather(
         adsb.fetch_aircraft(*bbox),
         notam.fetch_tfrs(*bbox),
@@ -101,6 +102,45 @@ async def assess(req: AssessRequest) -> DecisionReport:
     )
     loc = gather(req.lat, req.lon, aircraft=air, tfr_result=tfr, population=pop, buildings=bld, terrain=terr)
     return build_report(req, loc)
+
+
+@app.post("/api/assess", response_model=DecisionReport)
+async def assess(req: AssessRequest) -> DecisionReport:
+    """Core endpoint: location + profile -> decision report (with live feeds)."""
+    return await _run_assess(req)
+
+
+# --------------------------------------------------------------------------- #
+# TAK (ATAK/WinTAK) export — Cursor-on-Target + data package
+# --------------------------------------------------------------------------- #
+@app.post("/api/cot/assessment")
+async def cot_assessment(req: AssessRequest) -> Response:
+    """Assessment as a CoT marker (XML) — push to a TAK Server or import."""
+    report = await _run_assess(req)
+    return Response(content=cot.assessment_cot(report), media_type="application/xml")
+
+
+@app.post("/api/tak/datapackage")
+async def tak_datapackage(req: AssessRequest) -> Response:
+    """Assessment as a TAK data package (.zip) for ATAK/WinTAK file import."""
+    report = await _run_assess(req)
+    uid = f"CUAS.{req.lat:.4f}_{req.lon:.4f}"
+    pkg = datapackage.build_package(cot.assessment_cot(report, uid=uid), uid=uid)
+    return Response(
+        content=pkg,
+        media_type="application/zip",
+        headers={"Content-Disposition": 'attachment; filename="cuas-assessment.zip"'},
+    )
+
+
+@app.get("/api/cot/aircraft")
+async def cot_aircraft(
+    lamin: float = Query(...), lomin: float = Query(...),
+    lamax: float = Query(...), lomax: float = Query(...),
+) -> Response:
+    """Live aircraft as a CoT event stream (for TAK Server / CoT ingestion)."""
+    data = await adsb.fetch_aircraft(lamin, lomin, lamax, lomax)
+    return Response(content=cot.aircraft_feed_cot(data), media_type="application/xml")
 
 
 # Serve the built frontend as a single service (registered LAST so /api and

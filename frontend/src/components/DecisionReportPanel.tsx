@@ -1,4 +1,19 @@
+import { api } from "../api/client";
 import type { CountermeasureAssessment, DecisionReport } from "../types";
+
+async function exportTak(report: DecisionReport) {
+  try {
+    const blob = await api.takPackage(report.profile, report.location.lat, report.location.lon);
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "cuas-assessment.zip";
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch {
+    /* ignore export errors */
+  }
+}
 
 const BAND_CLASS: Record<string, string> = {
   low: "band-low",
@@ -45,6 +60,10 @@ export function DecisionReportPanel({ report }: { report: DecisionReport }) {
   return (
     <div className="report">
       <div className="banner">{report.authority_banner}</div>
+
+      <button className="tak-btn" onClick={() => exportTak(report)} title="Download a TAK data package (ATAK/WinTAK)">
+        ⤓ Export to TAK (ATAK/WinTAK)
+      </button>
 
       <div className="loc-summary">
         <div className="loc-title">{loc.place_label}</div>

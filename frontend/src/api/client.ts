@@ -27,4 +27,13 @@ export const api = {
     if (!res.ok) throw new Error(`assess -> ${res.status}`);
     return res.json() as Promise<DecisionReport>;
   },
+  takPackage: async (profile: string, lat: number, lon: number): Promise<Blob> => {
+    const res = await fetch("/api/tak/datapackage", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ profile, lat, lon, credible_threat: false }),
+    });
+    if (!res.ok) throw new Error(`tak -> ${res.status}`);
+    return res.blob();
+  },
 };

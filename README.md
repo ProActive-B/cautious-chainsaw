@@ -26,7 +26,11 @@ collateral-**risk score** for each actionable option, and the
   relief) informs line-of-sight (HEL beam path, RF/EO-IR masking). All keyless.
   TFR/NOTAM client is wired but key-gated (`FAA_NOTAM_API_KEY`). Remaining sample
   data: only the bespoke zones (CI campus, stadium, prison).
-- ⏳ **Phase 4:** TAK (ATAK/WinTAK) export; offline/on-prem bundles
+- ✅ **Phase 4 — TAK export:** export an assessment as **Cursor-on-Target (CoT)**
+  and as an importable **TAK data package** (`.zip`) for ATAK/WinTAK (the marker
+  carries the decision summary in its remarks); live aircraft as a CoT stream
+  (`/api/cot/aircraft`). "Export to TAK" button in the report panel.
+- ⏳ **Next:** offline/on-prem (PWA + bundled data); live TFR key; counsel review.
 
 Refresh the staged FAA airspace anytime: `python backend/scripts/stage_faa_texas.py`.
 
