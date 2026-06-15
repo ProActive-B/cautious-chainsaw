@@ -29,6 +29,7 @@
   .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
   .card{background:var(--panel2);border:1px solid var(--border);border-radius:8px;padding:12px 14px}
   .card b{color:var(--text)}
+  #limits + .grid2 .card{background:rgba(210,153,34,.22);border-color:#d29922}
   ul{margin:8px 0;padding-left:20px}
   li{margin:4px 0}
   .pill{display:inline-block;font-size:11px;border-radius:10px;padding:1px 8px;font-weight:600}
@@ -39,6 +40,34 @@
   .toc a{display:block;padding:3px 0;text-decoration:none}
   .footnote{color:var(--muted);font-size:12.5px;margin-top:8px}
   @media(max-width:680px){.grid2{grid-template-columns:1fr}}
+
+  /* ---- Print / PDF pagination ---- */
+  @media print{
+    @page{size:Letter;margin:7mm}
+    html,body{background:var(--bg);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+    .wrap{max-width:none;margin:0;padding:14mm 9mm 6mm}
+    p{margin:6px 0}
+    h2{margin:14px 0 6px;padding-top:12px}
+    .fig{margin:10px 0;padding:10px}
+    .fig,.toc,.card,.grid2{break-inside:avoid;page-break-inside:avoid}
+    /* large figures: cap height so paired sections fit one page */
+    .fig svg{max-height:270px;width:auto;max-width:100%;margin:0 auto}
+    /* compact the page-1 header + TOC so header + TOC + §1 fit together */
+    header.hero{padding-bottom:14px;margin-bottom:4px}
+    .lead{font-size:15px;margin:6px 0}
+    .toc{margin:10px 0;padding:8px 14px}
+    .toc strong{font-size:13px}
+    .toclist{display:grid;grid-template-columns:1fr 1fr;grid-auto-flow:column;grid-template-rows:repeat(4,auto);column-gap:24px}
+    .toc a{padding:2px 0;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    /* §1 + header/TOC share page 1; these each start a fresh page,
+       with a top buffer matching page 1 (dark padding inside the thin frame) */
+    #profile,#layers,#risk,#flow{
+      break-before:page;page-break-before:always;
+      margin-top:0;padding-top:12mm;border-top:0
+    }
+    /* §4, §6, §8 stay with the section above them, but keep a divider */
+    #report,#docs,#limits{break-before:auto;page-break-before:avoid}
+  }
 </style>
 </head>
 <body>
@@ -54,14 +83,16 @@
 
 <div class="toc">
   <strong>In this guide</strong>
-  <a href="#overview">1 · The screen at a glance</a>
-  <a href="#profile">2 · Authority profile — the master filter</a>
-  <a href="#layers">3 · Map layers</a>
-  <a href="#report">4 · The decision report</a>
-  <a href="#risk">5 · Collateral-risk scoring</a>
-  <a href="#docs">6 · Documentation &amp; coordination pathway</a>
-  <a href="#flow">7 · How a decision is made</a>
-  <a href="#limits">8 · What it is — and isn't</a>
+  <div class="toclist">
+    <a href="#overview">1 · The screen at a glance</a>
+    <a href="#profile">2 · Authority profile — the master filter</a>
+    <a href="#layers">3 · Map layers</a>
+    <a href="#report">4 · The decision report</a>
+    <a href="#risk">5 · Collateral-risk scoring</a>
+    <a href="#docs">6 · Documentation &amp; coordination pathway</a>
+    <a href="#flow">7 · How a decision is made</a>
+    <a href="#limits">8 · What it is — and isn't</a>
+  </div>
 </div>
 
 <!-- 1. OVERVIEW -->
@@ -91,9 +122,9 @@
   <rect x="20" y="288" width="280" height="36" rx="6" fill="#222a35" stroke="#7c3aed"/>
   <text x="32" y="304" fill="#cfd8e0" font-size="10">DHS/DOJ covered-facility authority:</text>
   <text x="32" y="317" fill="#cfd8e0" font-size="10">detection + mitigation w/ FAA coordination</text>
-  <text x="20" y="350" fill="#4ac26b" font-size="12" font-weight="700">Permitted 4</text>
-  <text x="20" y="372" fill="#e3b341" font-size="12" font-weight="700">Conditional 8</text>
-  <text x="20" y="394" fill="#ff7b72" font-size="12" font-weight="700">Prohibited 0</text>
+  <text x="20" y="350" fill="#4ac26b" font-size="12" font-weight="700">Permitted<tspan x="118">4</tspan></text>
+  <text x="20" y="372" fill="#e3b341" font-size="12" font-weight="700">Conditional<tspan x="118">8</tspan></text>
+  <text x="20" y="394" fill="#ff7b72" font-size="12" font-weight="700">Prohibited<tspan x="118">0</tspan></text>
   <!-- map -->
   <rect x="320" y="0" width="600" height="470" fill="#0e2233"/>
   <g opacity="0.5" stroke="#1f3b52"><line x1="320" y1="120" x2="920" y2="120"/><line x1="320" y1="240" x2="920" y2="240"/><line x1="320" y1="360" x2="920" y2="360"/><line x1="470" y1="0" x2="470" y2="470"/><line x1="620" y1="0" x2="620" y2="470"/><line x1="770" y1="0" x2="770" y2="470"/></g>
@@ -112,7 +143,7 @@
   <g font-size="11" fill="#e6edf3">
     <rect x="610" y="120" width="150" height="18" rx="3" fill="#000" fill-opacity="0.55"/><text x="616" y="133">Class B airspace ring</text>
     <rect x="700" y="332" width="130" height="18" rx="3" fill="#000" fill-opacity="0.55"/><text x="706" y="345">Special-use airspace</text>
-    <rect x="535" y="108" width="160" height="18" rx="3" fill="#000" fill-opacity="0.55"/><text x="541" y="121">Clicked point (your facility)</text>
+    <rect x="440" y="82" width="160" height="18" rx="3" fill="#000" fill-opacity="0.55"/><text x="446" y="95">Clicked point (your facility)</text>
     <rect x="600" y="186" width="140" height="18" rx="3" fill="#000" fill-opacity="0.55"/><text x="606" y="199">Live aircraft (by altitude)</text>
   </g>
 </svg>

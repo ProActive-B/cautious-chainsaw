@@ -45,7 +45,12 @@ export interface LocationAttributes {
   nearest_airport_distance_nm?: number | null;
   population_density_per_km2?: number | null;
   building_density?: "low" | "medium" | "high" | null;
+  building_count?: number | null;
   rf_congestion?: "low" | "medium" | "high" | null;
+  elevation_m?: number | null;
+  relief_m?: number | null;
+  terrain?: "flat" | "rolling" | "rugged" | null;
+  high_ground?: boolean | null;
   location_flags: Record<string, boolean>;
   active_tfr: boolean;
   active_tfr_names: string[];

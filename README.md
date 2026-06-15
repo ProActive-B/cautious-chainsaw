@@ -22,9 +22,10 @@ collateral-**risk score** for each actionable option, and the
   keyless) feed overhead-traffic into the risk score; **real FAA Class B/C/D +
   Special Use Airspace** (Texas) drive the airspace class; **real population
   density** (US Census ACS, live point query) drives debris risk; **real building
-  density** (OpenStreetMap/Overpass). All keyless. TFR/NOTAM client is wired but
-  key-gated (`FAA_NOTAM_API_KEY`). Remaining sample data: terrain/LOS and the
-  bespoke zones (CI campus, stadium).
+  density** (OpenStreetMap/Overpass); **real terrain** (USGS 3DEP elevation +
+  relief) informs line-of-sight (HEL beam path, RF/EO-IR masking). All keyless.
+  TFR/NOTAM client is wired but key-gated (`FAA_NOTAM_API_KEY`). Remaining sample
+  data: only the bespoke zones (CI campus, stadium, prison).
 - ⏳ **Phase 4:** TAK (ATAK/WinTAK) export; offline/on-prem bundles
 
 Refresh the staged FAA airspace anytime: `python backend/scripts/stage_faa_texas.py`.

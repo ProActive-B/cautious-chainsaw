@@ -76,6 +76,16 @@ def test_gather_uses_injected_population_and_buildings():
     assert loc.rf_congestion == "high"
 
 
+def test_gather_uses_injected_terrain():
+    loc = gather(
+        32.95, -96.65,
+        terrain={"elevation_m": 1850.0, "relief_m": 120.0, "terrain": "rugged", "high_ground": True},
+    )
+    assert loc.elevation_m == 1850.0
+    assert loc.terrain == "rugged"
+    assert loc.high_ground is True
+
+
 def test_tfr_note_surfaced_when_unconfigured():
     tfr = {"configured": False, "tfrs": [], "note": "TFR feed not configured."}
     loc = gather(32.95, -96.65, tfr_result=tfr)

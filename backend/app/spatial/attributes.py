@@ -36,6 +36,7 @@ def gather(
     tfr_result: dict | None = None,
     population: dict | None = None,
     buildings: dict | None = None,
+    terrain: dict | None = None,
 ) -> LocationAttributes:
     seed = load_seed()
     notes: list[str] = []
@@ -70,6 +71,13 @@ def gather(
     near_airport = (nearest_dist or 99) < 5
     rf_congestion = "high" if (pop_band == "high" or building_band == "high" or near_airport) else (pop_band or building_band)
 
+    # --- Terrain (USGS 3DEP) for line-of-sight context ---
+    if terrain:
+        notes.append(
+            f"Terrain from USGS 3DEP: {terrain.get('elevation_m')} m, {terrain.get('terrain')} "
+            f"(relief {terrain.get('relief_m')} m){', local high ground' if terrain.get('high_ground') else ''}."
+        )
+
     # --- Bespoke zones (critical infrastructure, stadium, ...) from seed ---
     for zone in seed.get("zones", []):
         if haversine_nm(lat, lon, zone["lat"], zone["lon"]) <= zone["radius_nm"]:
@@ -93,6 +101,10 @@ def gather(
         building_density=building_band,
         building_count=building_count,
         rf_congestion=rf_congestion,
+        elevation_m=terrain.get("elevation_m") if terrain else None,
+        relief_m=terrain.get("relief_m") if terrain else None,
+        terrain=terrain.get("terrain") if terrain else None,
+        high_ground=terrain.get("high_ground") if terrain else None,
         location_flags=flags,
         active_tfr=active_tfr,
         active_tfr_names=tfr_names,

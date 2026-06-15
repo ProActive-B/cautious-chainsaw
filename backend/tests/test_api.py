@@ -9,7 +9,7 @@ from __future__ import annotations
 
 from fastapi.testclient import TestClient
 
-from app.feeds import adsb, buildings, census, notam
+from app.feeds import adsb, buildings, census, notam, terrain as terrain_feed
 from app.main import app
 
 client = TestClient(app)
@@ -36,6 +36,11 @@ async def _fake_buildings(*_a, **_k):
     return {"count": 140, "band": "high", "radius_m": 500, "source": "OSM"}
 
 
+async def _fake_terrain(*_a, **_k):
+    return {"elevation_m": 131.0, "relief_m": 25.0, "terrain": "rolling",
+            "high_ground": False, "source": "USGS 3DEP"}
+
+
 def test_health_ok():
     r = client.get("/health")
     assert r.status_code == 200
@@ -54,6 +59,7 @@ def test_assess_endpoint_ok(monkeypatch):
     monkeypatch.setattr(notam, "fetch_tfrs", _fake_tfr)
     monkeypatch.setattr(census, "population_density", _fake_pop)
     monkeypatch.setattr(buildings, "building_density", _fake_buildings)
+    monkeypatch.setattr(terrain_feed, "terrain", _fake_terrain)
     r = client.post(
         "/api/assess",
         json={"profile": "federal_124n", "lat": 32.8998, "lon": -97.0403, "credible_threat": True},
@@ -64,5 +70,7 @@ def test_assess_endpoint_ok(monkeypatch):
     # Real population + buildings flow into the location.
     assert body["location"]["population_density_per_km2"] == 1800.0
     assert body["location"]["building_count"] == 140
+    assert body["location"]["terrain"] == "rolling"
+    assert body["location"]["elevation_m"] == 131.0
     # The malformed (null-icao24) aircraft must not break the response.
     assert isinstance(body["location"]["nearby_aircraft"], list)

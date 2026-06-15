@@ -83,6 +83,8 @@ def score(cm: Countermeasure, loc: LocationAttributes) -> RiskScore:
             drivers.append("radar frequency coordination near airport")
         else:
             drivers.append("passive / minimal collateral")
+        if loc.terrain == "rugged" or loc.high_ground is False:
+            drivers.append("terrain masking may reduce detection range/LOS")
         return RiskScore(value=_clamp(value), band=_band(_clamp(value)), drivers=drivers)
 
     if cm in (Countermeasure.KINETIC, Countermeasure.NET_CAPTURE, Countermeasure.INTERCEPTOR_DRONE):
@@ -101,6 +103,9 @@ def score(cm: Countermeasure, loc: LocationAttributes) -> RiskScore:
         if cm == Countermeasure.HPM:
             value += 15
             drivers.append("area electronics-damage cone")
+        if loc.terrain == "rugged":
+            value *= 0.9
+            drivers.append("rugged terrain attenuates RF spread")
         drivers.extend(air_drivers)
 
     elif cm == Countermeasure.GNSS_JAM_SPOOF:
@@ -111,6 +116,11 @@ def score(cm: Countermeasure, loc: LocationAttributes) -> RiskScore:
     elif cm == Countermeasure.HEL:
         value = 55 + air_pen
         drivers.append("ocular hazard (NOHD) + aviation flash/dazzle along beam path")
+        if loc.high_ground:
+            value += 8
+            drivers.append("elevated site extends laser line-of-sight hazard")
+        elif loc.terrain == "rugged":
+            drivers.append("rugged terrain limits/obstructs beam path")
         drivers.extend(air_drivers)
 
     elif cm == Countermeasure.PROTOCOL_TAKEOVER:

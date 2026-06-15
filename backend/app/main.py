@@ -10,7 +10,7 @@ from fastapi.staticfiles import StaticFiles
 
 from . import __version__
 from .config import settings
-from .feeds import adsb, buildings, census, faa, notam
+from .feeds import adsb, buildings, census, faa, notam, terrain as terrain_feed
 from .models import AssessRequest, DecisionReport
 from .report import build_report
 from .rules.loader import load_rules
@@ -45,6 +45,7 @@ def health() -> dict:
             "aircraft_provider": "adsb.lol / airplanes.live (community, keyless)",
             "population_source": "US Census ACS (live, keyless)",
             "buildings_source": "OpenStreetMap / Overpass (live, keyless)",
+            "terrain_source": "USGS 3DEP (live, keyless)",
             "tfr_configured": bool(settings.faa_notam_api_key),
         },
     }
@@ -91,13 +92,14 @@ async def assess(req: AssessRequest) -> DecisionReport:
     """Core endpoint: location + profile -> decision report (with live feeds)."""
     bbox = (req.lat - _ASSESS_BOX, req.lon - _ASSESS_BOX, req.lat + _ASSESS_BOX, req.lon + _ASSESS_BOX)
     # Fetch all live feeds concurrently; each fails safe to None/[] internally.
-    air, tfr, pop, bld = await asyncio.gather(
+    air, tfr, pop, bld, terr = await asyncio.gather(
         adsb.fetch_aircraft(*bbox),
         notam.fetch_tfrs(*bbox),
         census.population_density(req.lat, req.lon),
         buildings.building_density(req.lat, req.lon),
+        terrain_feed.terrain(req.lat, req.lon),
     )
-    loc = gather(req.lat, req.lon, aircraft=air, tfr_result=tfr, population=pop, buildings=bld)
+    loc = gather(req.lat, req.lon, aircraft=air, tfr_result=tfr, population=pop, buildings=bld, terrain=terr)
     return build_report(req, loc)
 
 

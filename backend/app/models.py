@@ -85,6 +85,10 @@ class LocationAttributes(BaseModel):
     building_density: Optional[Literal["low", "medium", "high"]] = None
     building_count: Optional[int] = None
     rf_congestion: Optional[Literal["low", "medium", "high"]] = None
+    elevation_m: Optional[float] = None
+    relief_m: Optional[float] = None
+    terrain: Optional[Literal["flat", "rolling", "rugged"]] = None
+    high_ground: Optional[bool] = None
     # Boolean zone flags (drive requires_location_flag rules).
     location_flags: dict[str, bool] = Field(default_factory=dict)
     active_tfr: bool = False

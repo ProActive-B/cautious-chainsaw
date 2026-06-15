@@ -51,8 +51,10 @@ export function DecisionReportPanel({ report }: { report: DecisionReport }) {
         <div className="loc-grid">
           <span>Airspace: <b>{loc.airspace_class ?? "—"}</b></span>
           <span>Nearest airport: <b>{loc.nearest_airport ?? "—"}{loc.nearest_airport_distance_nm != null ? ` (${loc.nearest_airport_distance_nm} nm)` : ""}</b></span>
-          <span>Pop. density: <b>{loc.building_density ?? "—"}{loc.population_density_per_km2 != null ? ` (${loc.population_density_per_km2}/km²)` : ""}</b></span>
+          <span>Pop. density: <b>{loc.population_density_per_km2 != null ? `${loc.population_density_per_km2}/km²` : "—"}</b></span>
+          <span>Buildings: <b>{loc.building_density ?? "—"}{loc.building_count != null ? ` (${loc.building_count})` : ""}</b></span>
           <span>RF congestion: <b>{loc.rf_congestion ?? "—"}</b></span>
+          <span>Terrain: <b>{loc.terrain ?? "—"}{loc.elevation_m != null ? ` · ${loc.elevation_m} m` : ""}{loc.high_ground ? " · high ground" : ""}</b></span>
           {Object.keys(loc.location_flags).length > 0 && (
             <span className="full">Zone flags: <b>{Object.keys(loc.location_flags).join(", ")}</b></span>
           )}
